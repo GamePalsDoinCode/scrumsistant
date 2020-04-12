@@ -1,4 +1,4 @@
-<div class="top-of-page">
+<div class="top-of-page" style="margin-bottom: 35px;">
   <div class="title" style="font-size:36px;margin: auto;width: 700px;margin-top: 10px;">
     Uncle Sam Wants You (&#9757;) To &#9758; This Story
   </div>
@@ -9,4 +9,35 @@
     Link To Story Goes Here!
   </div>
 </div>
+
 <div class="bottom-of-page">
+
+  <div style="width:20%; margin: auto;margin-bottom: 25px;">
+    <button
+      style="width: 100%;height:50px; margin: auto;"
+      (click)="beginVote()"
+      *ngIf="votingStates[votingStateIndex] == 'preVoting'"
+    >
+      Start The Vote! 🔫
+    </button>
+  </div>
+
+
+  <div *ngIf="votingStates[votingStateIndex] == 'periVoting'" style="width: 100%;">
+    <div>
+      {{allowedVotingTimeSeconds}}
+    </div>
+
+    <div style="margin: auto; width: 30%;margin-bottom: 10px;">
+      How many points do YOU think it is?!
+    </div>
+
+    <div style="margin: auto; width: 45%;">
+      <button *ngFor="let point of points" style="width: 50px; padding:10px;margin:5px;" (click)="selectPoint(point)">
+        {{point}}
+      </button>
+    </div>
+
+  </div>
+
+
