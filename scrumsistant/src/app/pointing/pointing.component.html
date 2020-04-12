@@ -40,4 +40,15 @@
 
   </div>
 
+  <div *ngIf="votingStates[votingStateIndex] == 'postVoting'" style="width: 100%;">
+    <div style="margin: auto; width: 30%;margin-bottom: 10px;">
+      The votes are in!
+    </div>
+    <div style="margin: auto; width: 30%;margin-bottom: 10px;">
+      Average: {{average || 'Error!'}}<br>
+      Outliers: <span *ngIf="outlier !== undefined">Some fuck is out of zimzar mind and said {{outlier}}</span><span *ngIf="outlier === undefined">All on the same page!</span>
+  </div>
+
+
+
 

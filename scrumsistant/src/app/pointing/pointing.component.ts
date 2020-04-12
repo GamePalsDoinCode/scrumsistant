@@ -30,7 +30,9 @@ export class PointingComponent implements OnInit {
   allowedVotingTimeSeconds = 3
 
   numVoters: number = 1 // TODO this will be more sophisticated
-  votes: number[]
+  votes: number[] = []
+  outlier: number | undefined = undefined
+  average: number | undefined = undefined
 
 
   constructor() { }
@@ -50,6 +52,12 @@ export class PointingComponent implements OnInit {
      ){
       this.votingStateIndex = 2
     }
+
+
+    // TEMP WIHLE THERES NOT OTHER FRIENDS
+    this.votes.push(Math.floor(Math.random() * 20 + 1))
+    this.voteAverage()
+    this.voteOutliers()
   }
 
   beginVote(){
@@ -70,5 +78,21 @@ export class PointingComponent implements OnInit {
       },
     )
   }
+
+  voteAverage(){
+    let average = this.votes.reduce((acc, vote) => acc + vote, 0) / this.votes.length
+    let diffs = this.points.map(point => Math.abs(point - average))
+    let lowest = Math.min(...diffs)
+    let lowestIdx = diffs.findIndex(diff => diff == lowest)
+    this.average = this.points[lowestIdx]
+  }
+
+  voteOutliers(){
+    // TEMP
+    let names = ['Alfonso', 'Alice', 'Amelia']
+    let outlier = this.votes.find(vote => Math.abs(this.average - vote) > 1)
+    this.outlier = outlier
+  }
+
 
 }
