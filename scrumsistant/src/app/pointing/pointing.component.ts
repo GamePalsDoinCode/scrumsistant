@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {timer, interval} from 'rxjs';
-import {takeUntil} from 'rxjs/operators'
+import {ClockService} from '../clock.service'
 
 @Component({
   selector: 'app-pointing',
@@ -35,7 +34,7 @@ export class PointingComponent implements OnInit {
   average: number | undefined = undefined
 
 
-  constructor() { }
+  constructor(private clockService: ClockService) {}
 
   ngOnInit(): void {
   }
@@ -65,18 +64,24 @@ export class PointingComponent implements OnInit {
       return
     }
     this.votingStateIndex = 1
-
-    let timer$ = timer((this.allowedVotingTimeSeconds + 1) * 1000)
-    let tickSource$ = interval(1000)
-    tickSource$.pipe(takeUntil(timer$)).subscribe(
-      tick => {
-        this.allowedVotingTimeSeconds = this.allowedVotingTimeSeconds - 1
-      },
-      () => {}, //onError
-      () => {
-        this.votingStateIndex = 2
-      },
+    this.clockService.getTimer(
+      this.allowedVotingTimeSeconds,
+      1000,
+      () => this.allowedVotingTimeSeconds = this.allowedVotingTimeSeconds - 1,
+      () => this.votingStateIndex = 2,
     )
+
+    // let timer$ = timer((this.allowedVotingTimeSeconds + 1) * 1000)
+    // let tickSource$ = interval(1000)
+    // tickSource$.pipe(takeUntil(timer$)).subscribe(
+    //   tick => {
+    //     this.allowedVotingTimeSeconds = this.allowedVotingTimeSeconds - 1
+    //   },
+    //   () => {}, //onError
+    //   () => {
+    //     this.votingStateIndex = 2
+    //   },
+    // )
   }
 
   voteAverage(){
