@@ -19,8 +19,6 @@ async def notify_users(payload, users = None):
 
 async def register(websocket):
 	current_users.add(websocket)
-	message = json.dumps({'type': MessageType.USER_JOINED.value})
-	await notify_users(message)
 
 async def unregister(websocket):
 	current_users.remove(websocket)
@@ -32,11 +30,12 @@ async def main(websocket, path):
 	try:
 		async for message in websocket:
 			data = json.loads(message)
-			print(data, )
+			print(data)
 			if data['type'] == MessageType.USER_JOINED.value:
 				name = data['name']
 				print(f'{name} just joined up!')
-				await notify_users({'type': MessageType.USER_JOINED.value, 'name': name})
+				payload = {'type': MessageType.USER_JOINED.value, 'name': name}
+				await notify_users(json.dumps(payload))
 	finally:
 		await unregister(websocket)
 
