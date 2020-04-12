@@ -7,3 +7,15 @@
 <div>
   <a routerLink="/retro">Sprint Retro!</a>
 </div>
+<div>
+  <div *ngIf="!nameLocked">
+    <label>Your Name:
+      <input [(ngModel)]="user.name" />
+    </label>
+    <button (click)="lockName()">Go!</button>
+  </div>
+
+    <div *ngIf="nameLocked">
+      Your Name: {{user.name}}
+    </div>
+</div>
