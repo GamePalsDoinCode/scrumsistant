@@ -15,7 +15,7 @@ class Server:
 	def __init__(self, info_dict):
 		self.info_dict = info_dict
 
-	async def setup(self, websocket, path):
+	async def router(self, websocket, path):
 		if websocket not in self.info_dict:
 			await register(websocket)
 		try:
@@ -30,11 +30,19 @@ class Server:
 		finally:
 			await unregister(websocket)
 
-	def run(self):
-		start_server = websockets.serve(self.setup, 'localhost', 8000)
-		asyncio.get_event_loop().run_until_complete(start_server)
-		asyncio.get_event_loop().run_forever()
+	def get_server_task(self, func, route = 'localhost', port = 8000):
+		start_server = websockets.serve(func, route, port)
+		return start_server
+
+	def run(self, loop = None):
+		start_server = self.get_server_task(self.router)
+		if loop is None:
+			loop = asyncio.get_event_loop()
+
+		loop.run_until_complete(start_server)
+		loop.run_forever()
 
 
-s = Server(WEBSOCKET_INFO_DICT)
-s.run()
+if __name__ == '__main__':
+	s = Server(WEBSOCKET_INFO_DICT)
+	s.run()
