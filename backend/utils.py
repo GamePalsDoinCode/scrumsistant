@@ -2,13 +2,12 @@ import asyncio
 import json
 
 from structs import get_info_dict, WebsocketInfo
-
 WEBSOCKET_INFO_DICT = get_info_dict()
 
 
 async def register(websocket):
 	WEBSOCKET_INFO_DICT[websocket] = WebsocketInfo(
-		username='Uninitalized',
+		username = 'Uninitalized',
 	)
 
 
@@ -22,7 +21,7 @@ async def unregister(websocket):
 		await notify_users(payload)
 
 
-async def notify_users(payload, users=None):
+async def notify_users(payload, users = None):
 	if users is None:
 		users = WEBSOCKET_INFO_DICT.keys()
 	await asyncio.wait([
