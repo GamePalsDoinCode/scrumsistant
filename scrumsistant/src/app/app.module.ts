@@ -8,13 +8,15 @@ import { AppComponent } from './app.component';
 import { PointingComponent } from './pointing/pointing.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StandupComponent } from './standup/standup.component';
+import { NavComponent } from './nav/nav.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PointingComponent,
     DashboardComponent,
-    StandupComponent
+    StandupComponent,
+    NavComponent
   ],
   imports: [
     BrowserModule,

@@ -1,44 +1,29 @@
 import asyncio
 import websockets
 import json
-from enum import Enum
 
-
-class MessageType(Enum):
-	USER_JOINED = 'userJoined'
-
-
-current_users = set()
-
-async def notify_users(payload, users = None):
-	if users is None:
-		users = current_users
-
-	await asyncio.wait([user.send(payload) for user in users])
-
-
-async def register(websocket):
-	current_users.add(websocket)
-
-async def unregister(websocket):
-	current_users.remove(websocket)
-
+from utils import register, unregister
+from structs import MessageType, get_info_dict
+WEBSOCKET_INFO_DICT = get_info_dict()
+from handler_funcs import (
+	handle_get_usernames,
+	handle_new_user_joined,
+)
 
 async def main(websocket, path):
-	print(path)
-	await register(websocket)
+	if not websocket in WEBSOCKET_INFO_DICT:
+		await register(websocket)
 	try:
+		print(WEBSOCKET_INFO_DICT)
 		async for message in websocket:
 			data = json.loads(message)
 			print(data)
 			if data['type'] == MessageType.USER_JOINED.value:
-				name = data['name']
-				print(f'{name} just joined up!')
-				payload = {'type': MessageType.USER_JOINED.value, 'name': name}
-				await notify_users(json.dumps(payload))
+				await handle_new_user_joined(websocket, data)
+			elif data['type'] == 'getUsernames':
+				await handle_get_usernames(websocket)
 	finally:
 		await unregister(websocket)
-
 
 
 start_server = websockets.serve(main, 'localhost', 8000)

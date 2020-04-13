@@ -1,12 +1,8 @@
-<div>
-  <a routerLink="/standup">Daily Standup!</a>
-</div>
-<div>
-  <a routerLink="/pointing">Pointing Meeting!</a>
-</div>
-<div>
-  <a routerLink="/retro">Sprint Retro!</a>
-</div>
+<app-nav></app-nav>
+
+
+
+
 <div>
   <div *ngIf="!nameLocked">
     <label>Your Name:
@@ -16,6 +12,17 @@
   </div>
 
     <div *ngIf="nameLocked">
-      Your Name: {{user.name}}
+
+      <div>
+        Your Name: {{user.name}}
+      </div>
+
+      <div>
+        Current Users:
+        <div *ngFor="let name of usernames">
+          {{name}}
+        </div>
+      </div>
+
     </div>
 </div>

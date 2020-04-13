@@ -12,6 +12,7 @@ export class DashboardComponent implements OnInit {
   user = {name: "Punk"}
   nameLocked = false
   broadcastMsg = ''
+  usernames: string[] = []
 
   constructor() { }
 
@@ -22,11 +23,18 @@ export class DashboardComponent implements OnInit {
       err => console.log(err),
       () => console.log('connection closed'),
      )
+
   }
 
   lockName(): void{
     this.nameLocked = true
-    this.socket.next({type: 'userJoined', name: this.user.name})
+    this.socket.next({
+      type: 'userJoined',
+      name: this.user.name,
+    })
+    this.socket.next({
+      type: 'getUsernames',
+    })
   }
 
   handleIncoming(msg){
@@ -35,7 +43,11 @@ export class DashboardComponent implements OnInit {
       if (msg.name != this.user.name){
         this.broadcastMsg = `Say hello to ${msg.name}!`
         console.log(this.broadcastMsg)
+        this.usernames.push(msg.name)
       }
+    } else if (msg.type == 'getUsernames'){
+      this.usernames = msg.usernames
+      console.log(msg.usernames)
     }
   }
 
