@@ -5,15 +5,9 @@ import pytest
 import pytest_asyncio
 import websockets
 
-from server import Server
-
+from .fixtures import server
 WEBSOCKET_URI = "ws://localhost:8000"
 
-@pytest.fixture
-def async_get_server(event_loop):
-	server = Server({})
-	task = server.get_server_task(server.router)
-	return event_loop.run_until_complete(task)
 
 async def send_message(message):
 	async with websockets.connect(WEBSOCKET_URI) as websocket:
@@ -23,7 +17,7 @@ async def send_message(message):
 
 
 @pytest.mark.asyncio
-async def test_socket(async_get_server):
+async def test_socket(server):
 	message = json.dumps({
 		"type": "userJoined",
 		"name": "piss",
