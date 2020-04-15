@@ -11,6 +11,6 @@ class MessageType(Enum):
 
 
 # This should pretty much be replaced with redis
-_WEBSOCKET_INFO_DICT: Dict[Any, WebsocketInfo]  = {}
+_WEBSOCKET_INFO_DICT: Dict[Any, WebsocketInfo] = {}
 def get_info_dict():
 	return _WEBSOCKET_INFO_DICT
