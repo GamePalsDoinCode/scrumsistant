@@ -2,11 +2,11 @@ import asyncio
 import websockets
 import json
 
-from utils import register, unregister
-from structs import MessageType, get_info_dict
+from .utils import register, unregister
+from .structs import MessageType, get_info_dict
 
 WEBSOCKET_INFO_DICT = get_info_dict()
-from handler_funcs import (
+from .handler_funcs import (
 	handle_get_usernames,
 	handle_new_user_joined,
 )

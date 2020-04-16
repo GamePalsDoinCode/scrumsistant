@@ -1,5 +1,5 @@
 import pytest
-from server import Server
+from ..server import Server
 
 
 @pytest.fixture
