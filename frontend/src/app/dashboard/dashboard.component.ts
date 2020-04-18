@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket'
 import {delay} from 'rxjs/operators'
+import { HttpClient } from '@angular/common/http';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -14,7 +16,7 @@ export class DashboardComponent implements OnInit {
   broadcastMsg = ''
   usernames: string[] = []
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.socket = webSocket('ws://localhost:8000')
