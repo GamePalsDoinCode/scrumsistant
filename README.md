@@ -8,8 +8,14 @@ See the README in the scrumsistant subfolder for setting up the front end but it
 [one time] Make sure you have angular CLI installed (https://cli.angular.io/)
     
     npm install -g @angular/cli
+
+[sometimes, including the first time] [in the frontend dir]
+    npm ci
+
+Why npm ci?  https://stackoverflow.com/a/53325242
+
     
-[every time], run the front end [in the scrumsistant subdir]
+[every time], run the front end [in the frontend subdir]
     
     ng serve [--open, will open a tab to the right url for you]
     [itll run for a bit, print out a bunch of shit, eventually you'll get either nice green or red compiler errors]
