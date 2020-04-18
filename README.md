@@ -10,6 +10,7 @@ See the README in the scrumsistant subfolder for setting up the front end but it
     npm install -g @angular/cli
 
 [sometimes, including the first time] [in the frontend dir]
+
     npm ci
 
 Why npm ci?  https://stackoverflow.com/a/53325242
