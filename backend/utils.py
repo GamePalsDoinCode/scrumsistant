@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from structs import get_info_dict, WebsocketInfo
+from .structs import get_info_dict, WebsocketInfo
 WEBSOCKET_INFO_DICT = get_info_dict()
 
 

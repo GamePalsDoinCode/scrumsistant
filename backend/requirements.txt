@@ -1,5 +1,5 @@
 websockets==8.1
 pytest==5.4.1
-pytest-asyncio==0.10.0
+git+git://github.com/pytest-dev/pytest-asyncio@master
 mypy==0.770
 pylint==2.4.4
