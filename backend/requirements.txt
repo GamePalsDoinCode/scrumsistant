@@ -5,3 +5,4 @@ mypy==0.770
 pylint==2.4.4
 redis==3.4.1
 hiredis==1.0.1
+black==19.10b0
