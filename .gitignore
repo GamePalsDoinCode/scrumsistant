@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 backend/tests/.cache
 backend/tests/.cache/*
+backend/local_settings.py
+backend/.mypy_cache
