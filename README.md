@@ -3,7 +3,7 @@ Assistant for Scrum Stuff
 
 ## FrontEnd
 
-See the README in the scrumsistant subfolder for setting up the front end but its mostly
+See the README in the frontend subfolder for setting up the front end but its mostly
 
 [one time] Make sure you have angular CLI installed (https://cli.angular.io/)
     
