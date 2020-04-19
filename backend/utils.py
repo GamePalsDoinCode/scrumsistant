@@ -13,9 +13,7 @@ async def register(websocket):
 async def unregister(websocket):
     dropped_user_info = WEBSOCKET_INFO_DICT.pop(websocket, None)
     if dropped_user_info:
-        payload = json.dumps(
-            {"type": "userLeft", "usernamer": dropped_user_info.username}
-        )
+        payload = json.dumps({"type": "userLeft", "usernamer": dropped_user_info.username})
         await notify_users(payload)
 
 
