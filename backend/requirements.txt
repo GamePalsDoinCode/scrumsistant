@@ -6,3 +6,5 @@ pylint==2.4.4
 redis==3.4.1
 hiredis==1.0.1
 black==19.10b0
+Flask==1.1.2
+flask-cors==3.0.8
