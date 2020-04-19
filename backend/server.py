@@ -127,8 +127,3 @@ class Server:
 
 		loop.run_until_complete(start_server)
 		loop.run_forever()
-
-
-if __name__ == '__main__':
-	s = Server()
-	s.run()

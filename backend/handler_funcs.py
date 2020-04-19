@@ -1,7 +1,7 @@
 import json
 
-from utils import notify_users
-from structs import MessageType
+from .utils import notify_users
+from .structs import MessageType
 
 async def handle_get_usernames(websocket):
 	#TODO move to flask
