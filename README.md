@@ -37,8 +37,8 @@ There's a lot of ways, I use this one (https://virtualenv.pypa.io/en/latest/).  
     
     pip install -r requirements.txt
     
-[every time, in the backend dir.  NOTE THIS WILL NOT AUTORELOAD FOR YOU.  IF YOU CHANGE CODE, ctrl+c AND RESTART IT]
+[every time, in the root dir.  NOTE THIS WILL NOT AUTORELOAD FOR YOU.  IF YOU CHANGE CODE, ctrl+c AND RESTART IT]
 
-    python server.py
+    python runserver.py
     [it won't print anything out, its just a run_forever asyncio thing.  Stuff will print out as you navigate around in the app]
 
