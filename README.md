@@ -8,8 +8,15 @@ See the README in the scrumsistant subfolder for setting up the front end but it
 [one time] Make sure you have angular CLI installed (https://cli.angular.io/)
     
     npm install -g @angular/cli
+
+[sometimes, including the first time] [in the frontend dir]
+
+    npm ci
+
+Why npm ci?  https://stackoverflow.com/a/53325242
+
     
-[every time], run the front end [in the scrumsistant subdir]
+[every time], run the front end [in the frontend subdir]
     
     ng serve [--open, will open a tab to the right url for you]
     [itll run for a bit, print out a bunch of shit, eventually you'll get either nice green or red compiler errors]
@@ -32,6 +39,6 @@ There's a lot of ways, I use this one (https://virtualenv.pypa.io/en/latest/).  
     
 [every time, in the backend dir.  NOTE THIS WILL NOT AUTORELOAD FOR YOU.  IF YOU CHANGE CODE, ctrl+c AND RESTART IT]
 
-    python main.py
+    python server.py
     [it won't print anything out, its just a run_forever asyncio thing.  Stuff will print out as you navigate around in the app]
 
