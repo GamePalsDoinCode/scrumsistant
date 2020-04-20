@@ -1,6 +1,7 @@
 import asyncio
 import json
 import functools
+import logging
 
 import websockets
 import redis
@@ -21,9 +22,11 @@ except:
     REDIS_PORT = 6379
     REDIS_DB = 0
 
+LOGGER = logging.getLogger(__name__)
 
 class Server:
     def __init__(self):
+		LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict = {}
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)

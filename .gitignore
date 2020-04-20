@@ -8,3 +8,5 @@ backend/tests/.cache/*
 backend/local_settings.py
 backend/.mypy_cache
 backend/local_settings.py
+*.log
+*.log.*
