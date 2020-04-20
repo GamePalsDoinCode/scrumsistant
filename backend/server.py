@@ -5,6 +5,8 @@ import logging
 
 import websockets
 import redis
+from dataclasses_serialization.json import JSONSerializer
+
 
 from .handler_funcs import (
     handle_get_usernames,
@@ -33,27 +35,38 @@ class Server:
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
 
-        websocket_handler = functools.partial(self.websocket_ipc_handler, self)
-        flask_handler = functools.partial(self.flask_ipc_handler, self)
         redis_pubsub_instance.subscribe(
-            **{'websocket-IPC': websocket_handler, 'flask-IPC': flask_handler,}
+            **{'websocket-IPC': self.websocket_ipc_handler, 'flask-IPC': self.flask_ipc_handler,}
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
 
-    def register(self, websocket):
+    async def register(self, websocket):
         next_pk = self.redis.incr('WEBSOCKET_PK')
-        self.websocket_info_dict[websocket] = WebsocketInfo(pk=next_pk, username='Uninitalized',)
+        new_user_obj = WebsocketInfo(pk=next_pk, username='Uninitalized',)
+        self.websocket_info_dict[websocket] = new_user_obj.pk
+        print('registered', self.websocket_info_dict)
         self.redis.set(
-            f'owns-connection-{next_pk}', self.SERVER_NAME,
+            f'owns-connection-{new_user_obj.pk}', self.SERVER_NAME,
         )
+        self.redis.hmset(f'user_{new_user_obj.pk}', JSONSerializer.serialize(new_user_obj))
+        self.redis.sadd('currentUserPKs', new_user_obj.pk)
+        socket_message = {
+            'type': 'confirmJoined',
+            'pk': new_user_obj.pk,
+        }
+        await websocket.send(json.dumps(socket_message))
 
     async def unregister(self, websocket):
-        dropped_user_info = self.websocket_info_dict.pop(websocket, None,)
-        if dropped_user_info:
-            self.redis.delete(f'owns-connection-{dropped_user_info.pk}')
+        dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
+        if dropped_user_pk:
+            self.redis.delete(f'owns-connection-{dropped_user_pk}')
+            user_obj = JSONSerializer.deserialize(WebsocketInfo, self.redis.hgetall(f'user_{dropped_user_pk}'))
+            self.redis.delete(f'user_{dropped_user_pk}')
+            self.redis.spop('currentUserPKs', dropped_user_info.pk)
+
             message = {
                 'type': 'userLeft',
-                'pk': dropped_user_info.pk,
+                'pk': dropped_user_pk,
             }
             await self.broadcast(json.dumps(message))
 
@@ -70,9 +83,13 @@ class Server:
             self.redis.publish(
                 'websocket-IPC', json.dumps(redis_message),
             )
-        await asyncio.wait([socket.send(message) for socket in to])
+        print(to)
+        if to:
+            await asyncio.wait([socket.send(message) for socket in to])
 
     def websocket_ipc_handler(self, redis_message):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         data = json.loads(redis_message['data'].decode('utf8'))
 
         if data['sender'] == self.SERVER_NAME:
@@ -82,16 +99,24 @@ class Server:
             to = data['broadcastTo']
             message = data['message']
             if to == 'all':
-                self.broadcast(
-                    message, publish_to_redis=False,
-                )
+                task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
+                loop.run_until_complete(task)
 
     def flask_ipc_handler(self, redis_message):
-        print(redis_message)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        data = json.loads(redis_message['data'].decode('utf8'))
+        if data['messageType'] == 'userUpdated':
+            to = data['broadcastTo']
+            message = data['message']
+            if to == 'all':
+                print('sending flask message', message)
+                task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
+                loop.run_until_complete(task)
 
     async def router(self, websocket, path):
         if websocket not in self.websocket_info_dict:
-            self.register(websocket)
+            await self.register(websocket)
         try:
             async for message in websocket:
                 data = json.loads(message)
