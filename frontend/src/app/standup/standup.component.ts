@@ -13,7 +13,7 @@ export class StandupComponent implements OnInit {
 
   maxSpeakingTimeSeconds = 5
   participants = ['You', 'Dr. Tuttle', 'Judge Bostrum', 'Professor Stromburg']
-  speakerIdx = undefined
+  speakerIdx: number | undefined = undefined
 
   spokenIdxs = new Set()
   standupOver = false
@@ -37,7 +37,7 @@ export class StandupComponent implements OnInit {
 
   chooseNextSpeaker(){
 
-    let availableIdxs = []
+    let availableIdxs: number[] = []
     this.participants.map((_, idx) => {
       if (!this.spokenIdxs.has(idx)){
         availableIdxs.push(idx)

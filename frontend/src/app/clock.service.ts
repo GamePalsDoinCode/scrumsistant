@@ -9,7 +9,12 @@ export class ClockService {
 
   constructor() { }
 
-  getTimer(timeInSeconds, tickInterval, funcOnTick, funcOnComplete){
+  getTimer(
+    timeInSeconds: number,
+    tickInterval: number,
+    funcOnTick: (tick: number) => void,
+    funcOnComplete: () => void,
+  ){
     let timer$ = timer((timeInSeconds + 1) * 1000)
     let tickSource$ = interval(tickInterval)
     tickSource$.pipe(takeUntil(timer$)).subscribe(
