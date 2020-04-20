@@ -9,5 +9,5 @@ def init_logging():
     if platform.system() == "Windows":
         # For us ghouls that are running on Windows, won't have a /var, so log locally
         log_filename = "scrum.log"
-    
+
     logging.basicConfig(level=logging.DEBUG, filename=log_filename, format=logging_format)
