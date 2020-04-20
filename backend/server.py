@@ -13,16 +13,20 @@ from .handler_funcs import (
 from .structs import MessageType, WebsocketInfo
 
 try:
-    from .local_settings import SERVER_NAME
+    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
 except:
     SERVER_NAME = 'me'
+    REDIS_URL = 'localhost'
+    REDIS_PASSWORD = ''
+    REDIS_PORT = 6379
+    REDIS_DB = 0
 
 
 class Server:
     def __init__(self):
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict = {}
-        self.redis = redis.Redis(host='localhost', port=6379, db=0,)
+        self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
 
         websocket_handler = functools.partial(self.websocket_ipc_handler, self)
