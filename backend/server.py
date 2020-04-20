@@ -24,9 +24,10 @@ except:
 
 LOGGER = logging.getLogger(__name__)
 
+
 class Server:
     def __init__(self):
-		LOGGER.debug(f"Initializing Server")
+        LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict = {}
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
