@@ -7,3 +7,5 @@ backend/tests/.cache
 backend/tests/.cache/*
 backend/.mypy_cache
 backend/local_settings.py
+*.log
+*.log.*
