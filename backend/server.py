@@ -14,6 +14,7 @@ from .handler_funcs import (
 )
 
 from .structs import MessageType, WebsocketInfo
+from .utils import cleanup_redis_dict
 
 try:
     from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
@@ -42,7 +43,7 @@ class Server:
 
     async def register(self, websocket):
         next_pk = self.redis.incr('WEBSOCKET_PK')
-        new_user_obj = WebsocketInfo(pk=next_pk, username='Uninitalized',)
+        new_user_obj = WebsocketInfo(pk=next_pk, username='Uninitialized',)
         self.websocket_info_dict[websocket] = new_user_obj.pk
         print('registered', self.websocket_info_dict)
         self.redis.set(
@@ -54,20 +55,18 @@ class Server:
             'type': 'confirmJoined',
             'pk': new_user_obj.pk,
         }
+        print('new pk registered', next_pk)
         await websocket.send(json.dumps(socket_message))
 
     async def unregister(self, websocket):
         dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
+        print(dropped_user_pk, 'socket deregistered')
         if dropped_user_pk:
             self.redis.delete(f'owns-connection-{dropped_user_pk}')
-            user_obj = JSONSerializer.deserialize(WebsocketInfo, self.redis.hgetall(f'user_{dropped_user_pk}'))
+            user_dict = cleanup_redis_dict(self.redis.hgetall(f'user_{dropped_user_pk}'))
             self.redis.delete(f'user_{dropped_user_pk}')
-            self.redis.spop('currentUserPKs', dropped_user_info.pk)
-
-            message = {
-                'type': 'userLeft',
-                'pk': dropped_user_pk,
-            }
+            self.redis.srem('currentUserPKs', str(dropped_user_pk).encode('utf8'))
+            message = {'type': 'userLeft', 'pk': dropped_user_pk, 'name': user_dict['username']}
             await self.broadcast(json.dumps(message))
 
     async def broadcast(self, message, to=None, publish_to_redis=True):

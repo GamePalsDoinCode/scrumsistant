@@ -29,8 +29,15 @@ export class DashboardComponent implements OnInit {
       () => console.log('hey there! conn closed'),
     )
     this.dashboardService.getCurrentUserNames().subscribe(
-        d => console.log(d)
-      )
+      usernames => {
+        console.log(usernames)
+        console.log(usernames.filter(name => name != 'Uninitialized'))
+        this.usernames = this.usernames.concat(
+          usernames.filter(name => name != 'Uninitialized')
+         )
+        console.log(this.usernames)
+      }
+    )
   }
 
   lockName(): void{
@@ -57,7 +64,8 @@ export class DashboardComponent implements OnInit {
       }
     } else if (msg.type == 'confirmJoined'){
       this.user.pk = msg.pk
-
+    } else if (msg.type == 'userLeft'){
+      this.usernames = this.usernames.filter(name => name != msg.name)
     }
   }
 

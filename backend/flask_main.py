@@ -7,6 +7,7 @@ from flask_redis import FlaskRedis
 from dataclasses_serialization.json import JSONSerializer
 
 from .structs import WebsocketInfo
+from .utils import cleanup_redis_dict
 
 
 try:
@@ -26,22 +27,17 @@ redis_client = FlaskRedis(app)
 redis_pub_sub = redis_client.pubsub(ignore_subscribe_messages=True,)
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
-
 @app.route('/current_users', methods=['GET', 'POST',])
 def current_users():
+    print(f'current_users {request.method}')
     if request.method == 'GET':
-        current_pks = [f'user_{pk}' for pk in redis_client.smembers('currentUserPKs')]
-        current_users_serial = redis_client.mget(current_pks)
-        print(current_users_serial)
-        current_usernames = [
-            JSONSerializer.deserialize(WebsocketInfo, user).username
-            for user in current_users_serial
-            if user is not None
-        ]
+        current_pks = [f'user_{int(pk)}' for pk in redis_client.smembers('currentUserPKs')]
+        pipe = redis_client.pipeline()
+        for pk in current_pks:
+            pipe.hgetall(pk)
+        current_user_dicts = [cleanup_redis_dict(user) for user in pipe.execute() if user]
+        current_usernames = [user['username'] for user in current_user_dicts]
+        print(current_usernames)
         return json.dumps(current_usernames)
     elif request.method == 'POST':
         post_data = request.get_json()
