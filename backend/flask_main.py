@@ -1,14 +1,13 @@
 import json
 
+from dataclasses_serialization.json import JSONSerializer
 from flask import Flask, request
 from flask_cors import CORS
+from flask_login import LoginManager, login_user
 from flask_redis import FlaskRedis
-
-from dataclasses_serialization.json import JSONSerializer
 
 from .structs import WebsocketInfo
 from .utils import cleanup_redis_dict
-
 
 try:
     from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
@@ -25,6 +24,29 @@ app = Flask(__name__)
 CORS(app)
 redis_client = FlaskRedis(app)
 redis_pub_sub = redis_client.pubsub(ignore_subscribe_messages=True,)
+login_service = LoginManager(app)
+
+
+@login_service.user_loader
+def load_user(pk):
+    user_dict = cleanup_redis_dict(redis_client.hgetall(f'{user_int(pk)}'))
+    if user_dict:
+        user_dict['pk'] = int(user_dict['pk'])
+        user = JSONSerializer.deserialize(WebsocketInfo, user_dict)
+        return user
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    post_data = request.get_json()
+    user_email = post_data['email']
+    incoming_password = post_data['password']
+
+    user = get_user_by_email(user_email)
+    password_ok = user.check_password_hash(incoming_password,)
+
+    if user_pk and password_ok:
+        login_user()
 
 
 @app.route('/current_users', methods=['GET', 'POST',])

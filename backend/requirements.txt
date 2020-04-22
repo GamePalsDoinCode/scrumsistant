@@ -12,3 +12,4 @@ Flask==1.1.2
 flask-cors==3.0.8
 flask-redis==0.4.0
 dataclasses-serialization==1.2.4
+flask-login==0.5.0
