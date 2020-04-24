@@ -6,34 +6,39 @@ from flask_cors import CORS
 from flask_login import LoginManager, login_user
 from flask_redis import FlaskRedis
 
-from .structs import WebsocketInfo
+from .query_tools import get_user_by_email
+from .structs import HTTP_STATUS_CODE, WebsocketInfo
 from .utils import cleanup_redis_dict
 
 try:
-    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
+    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT, FLASK_SECRET_KEY
 except:
     SERVER_NAME = 'me'
     REDIS_URL = 'localhost'
     REDIS_PASSWORD = ''
     REDIS_PORT = 6379
     REDIS_DB = 0
+    FLASK_SECRET_KEY = b'this_is_random'
 
 REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_URL}:{REDIS_PORT}/{REDIS_DB}'
 
 app = Flask(__name__)
+app.secret_key = FLASK_SECRET_KEY
 CORS(app)
 redis_client = FlaskRedis(app)
 redis_pub_sub = redis_client.pubsub(ignore_subscribe_messages=True,)
 login_service = LoginManager(app)
+# login_service.login_view = 'login'
 
 
 @login_service.user_loader
 def load_user(pk):
-    user_dict = cleanup_redis_dict(redis_client.hgetall(f'{user_int(pk)}'))
+    user_dict = cleanup_redis_dict(redis_client.hgetall(f'user_{int(pk)}'))
     if user_dict:
         user_dict['pk'] = int(user_dict['pk'])
         user = JSONSerializer.deserialize(WebsocketInfo, user_dict)
         return user
+    return None
 
 
 @app.route('/login', methods=['POST'])
@@ -42,11 +47,13 @@ def login():
     user_email = post_data['email']
     incoming_password = post_data['password']
 
-    user = get_user_by_email(user_email)
-    password_ok = user.check_password_hash(incoming_password,)
+    user = get_user_by_email(user_email, redis_client)
+    password_ok = user.check_password(incoming_password)
 
-    if user_pk and password_ok:
-        login_user()
+    if password_ok:
+        login_user(user)
+        return {'auth': 'ok'}
+    return {'auth': 'not ok'}, HTTP_STATUS_CODE.HTTP_401_UNAUTHORIZED.value
 
 
 @app.route('/current_users', methods=['GET', 'POST',])
