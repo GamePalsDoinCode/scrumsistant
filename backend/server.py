@@ -8,7 +8,7 @@ import websockets
 
 from .handler_funcs import handle_get_usernames, handle_new_user_joined
 from .structs import MessageType, WebsocketInfo
-from .utils import cleanup_redis_dict
+from .utils import cleanup_redis_dict, transform_to_redis_safe_dict
 
 try:
     from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
@@ -43,7 +43,9 @@ class Server:
         self.redis.set(
             f'owns-connection-{new_user_obj.pk}', self.SERVER_NAME,
         )
-        self.redis.hmset(f'user_{new_user_obj.pk}', new_user_obj.serialize())
+        self.redis.hmset(
+            f'user_{new_user_obj.pk}', new_user_obj.serialize(serialize_method=transform_to_redis_safe_dict)
+        )
         self.redis.sadd('currentUserPKs', new_user_obj.pk)
         socket_message = {
             'type': 'confirmJoined',
@@ -114,10 +116,10 @@ class Server:
             async for message in websocket:
                 data = json.loads(message)
                 print(data)
-                if data['type'] == MessageType.USER_JOINED.value:
-                    await handle_new_user_joined(websocket, data)
-                elif data['type'] == 'getUsernames':
-                    await handle_get_usernames(websocket)
+                # if data['type'] == MessageType.USER_JOINED.value:
+                #     await handle_new_user_joined(websocket, data)
+                # elif data['type'] == 'getUsernames':
+                #     await handle_get_usernames(websocket)
         finally:
             await self.unregister(websocket)
 

@@ -48,7 +48,7 @@ def public_endpoint(function):
 
 @login_service.user_loader
 def load_user(pk):
-    user_dict = cleanup_redis_dict(redis_client.hgetall(pk))
+    user_dict = redis_client.hgetall(pk)
     if user_dict:
         user = WebsocketInfo.deserialize(user_dict)
         return user
