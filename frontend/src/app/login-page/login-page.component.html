@@ -6,7 +6,7 @@
     <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
       <span style="width: 120px; display: inline-block;">Email Address</span>
       <input [(ngModel)]="potentialUser.email" placeholder="you@example.com" type="email" style="width: 200px;" email="true" [ngModelOptions]="{updateOn: 'blur'}" #prmEmail="ngModel"/>
-      <span *ngIf="prmEmail.errors?.email">That's a shit email and you know it, bud</span>
+      <span *ngIf="prmEmail.errors?.email">That's a bad email, darling, and I think you can do better ;)</span>
     </div>
     <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
       <span style="width: 120px; display: inline-block;">Password</span>

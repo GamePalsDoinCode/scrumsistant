@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot } from '@angular/router';
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements CanActivate {
 
-  private _isAuthenticated = false
-  private sessionExpireTime = new Date() // god I hope I don't regret not using moment at the get go
   errorMessage = ''
 
   constructor(
@@ -18,18 +16,14 @@ export class AuthService {
   ) { }
 
   isAuthenticated() {
-    return (
-      new Date() < this.sessionExpireTime &&
-      this._isAuthenticated
-     )
+    // TODO: is this a bad idea to hit the backend on any route change?
+    return this.http.get('api/is_authenticated')
   }
 
   checkCredentials(user: {email: string, password: string}, redirectTo: string | null = null){
     this.errorMessage = ''
     this.http.post('/api/login', {...user}).subscribe(
       success => {
-        this._isAuthenticated = true
-        this.sessionExpireTime = new Date(this.sessionExpireTime.setFullYear(2021)) // TODO tmp, get expire time from backend
         this.router.navigate([redirectTo || '/app/dashboard'])
       },
       error => {
@@ -44,4 +38,23 @@ export class AuthService {
     return false
   }
 
+  logout(){
+    this.http.get('/api/logout').subscribe(
+      () => this.router.navigate(['/login']),
+      () => this.router.navigate(['/login']),
+    )
+  }
+
+  async canActivate(route: ActivatedRouteSnapshot){
+    // TODO: this should probably be moved into its own AuthGuard service
+    // TODO theres _def_ a better way to do this with something out of rxjs - find!
+      // tbh having the endpoint return something instead of error codes and using map might be nicer?
+    try{
+      await this.isAuthenticated().toPromise()
+      return true
+    } catch (_){
+      this.router.navigate(['/login'])
+      return false
+    }
+  }
 }

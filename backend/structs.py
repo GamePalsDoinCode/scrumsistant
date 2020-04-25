@@ -5,15 +5,26 @@ from dataclasses import replace as dataclass_replace
 from enum import Enum
 from typing import List, Optional
 
+from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
+
+
+class AnonymousUserWrapper(AnonymousUserMixin):
+    # current user will either be this or a WebSocketInfo
+    # the flask builtin has is_authenticated as a property
+    # but WebSocketInfo needs it to be a method.
+    # To maintain ducktyping, we need this shell of a class
+    # to expose a method for is_authenticated
+    # it always returns False by definition (because this is a representation of a user prior to logging in)
+    def is_authenticated(self, _):  # pylint: disable=arguments-differ,invalid-overridden-method
+        return False
 
 
 @dataclass
 class WebsocketInfo:
     pk: int  # pylint: diable
-    username: str = 'Uninitialized'
+    username: str = 'Uninitialized'  # TODO this should either be email, or we should have email separate and this should be display name
     password: Optional[str] = None
-    _is_authenticated: bool = False
 
     def serialize(
         self, skip_list: List[str] = None, serialize_method=json.dumps,
@@ -60,8 +71,8 @@ class WebsocketInfo:
         return dataclass_replace(new_obj, **serialized_obj)
 
     # methods required by flask-login
-    def is_authenticated(self):
-        return self._is_authenticated
+    def is_authenticated(self, session):
+        return session.get('_user_id') == f'user_{self.pk}'
 
     def is_active(
         self,
@@ -107,4 +118,5 @@ class MessageType(Enum):
 
 
 class HTTP_STATUS_CODE(Enum):
+    HTTP_200_OK = 200
     HTTP_401_UNAUTHORIZED = 401

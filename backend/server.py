@@ -1,18 +1,12 @@
 import asyncio
-import json
 import functools
+import json
 import logging
 
-import websockets
 import redis
-from dataclasses_serialization.json import JSONSerializer
+import websockets
 
-
-from .handler_funcs import (
-    handle_get_usernames,
-    handle_new_user_joined,
-)
-
+from .handler_funcs import handle_get_usernames, handle_new_user_joined
 from .structs import MessageType, WebsocketInfo
 from .utils import cleanup_redis_dict
 
@@ -49,7 +43,7 @@ class Server:
         self.redis.set(
             f'owns-connection-{new_user_obj.pk}', self.SERVER_NAME,
         )
-        self.redis.hmset(f'user_{new_user_obj.pk}', JSONSerializer.serialize(new_user_obj))
+        self.redis.hmset(f'user_{new_user_obj.pk}', new_user_obj.serialize())
         self.redis.sadd('currentUserPKs', new_user_obj.pk)
         socket_message = {
             'type': 'confirmJoined',

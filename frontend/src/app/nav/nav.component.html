@@ -4,13 +4,16 @@
       <a routerLink="/dashboard">Dashboard!</a>
     </li>
     <li>
-      <a routerLink="/standup">Daily Standup!</a>
+      <a routerLink="/app/standup">Daily Standup!</a>
     </li>
     <li>
-      <a routerLink="/pointing">Pointing Meeting!</a>
+      <a routerLink="/app/pointing">Pointing Meeting!</a>
     </li>
     <li>
-      <a routerLink="/retro">Sprint Retro!</a>
+      <a routerLink="/app/retro">Sprint Retro!</a>
+    </li>
+    <li (click)="logout()" style="border: solid 1px black">
+      Logout!
     </li>
   </ul>
 </nav>
