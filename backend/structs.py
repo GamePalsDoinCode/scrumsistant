@@ -6,29 +6,48 @@ from enum import Enum
 from typing import List, Optional
 from .exceptions import *
 
+from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from .utils import transform_to_redis_safe_dict
+
+
+class AnonymousUserWrapper(AnonymousUserMixin):
+    # current user will either be this or a WebSocketInfo
+    # the flask builtin has is_authenticated as a property
+    # but WebSocketInfo needs it to be a method.
+    # To maintain ducktyping, we need this shell of a class
+    # to expose a method for is_authenticated
+    # it always returns False by definition (because this is a representation of a user prior to logging in)
+    def is_authenticated(
+        self, _
+    ):  # pylint: disable=arguments-differ,invalid-overridden-method
+        return False
 
 
 @dataclass
 class WebsocketInfo:
     pk: int  # pylint: disable
-    username: str = 'Uninitialized'
+    username: str = "Uninitialized"  # TODO this should either be email, or we should have email separate and this should be display name
     password: Optional[str] = None
-    _is_authenticated: bool = False
 
     def serialize(
-        self, skip_list: List[str] = None, serialize_method=json.dumps,
+        self,
+        skip_list: List[str] = None,
+        serialize_method=transform_to_redis_safe_dict,
     ):
         if skip_list is None:
             skip_list = []
         serialized_form = dataclass_serialize(self)
-        reduced_serialized_form = {k: v for k, v in serialized_form.items() if not k in skip_list}
+        reduced_serialized_form = {
+            k: v for k, v in serialized_form.items() if not k in skip_list
+        }
         return serialize_method(reduced_serialized_form)
 
     @staticmethod
     def redis_transformers(field_name):
         def _string_transformer(byte_string):
-            return byte_string.decode('utf8')
+            return byte_string.decode("utf8")
 
         def _int_transformer(num_as_byte_string):
             return int(num_as_byte_string)
@@ -41,11 +60,11 @@ class WebsocketInfo:
 
         def _password_transformer(password_byte_string):
             password_or_null = _string_transformer(password_byte_string)
-            if password_or_null == 'null':
+            if password_or_null == "null":
                 return None
             return password_or_null
 
-        return locals()[f'_{field_name}_transformer']
+        return locals()[f"_{field_name}_transformer"]
 
     @staticmethod
     def deserialize(serialized_obj, from_redis=True):
@@ -54,15 +73,15 @@ class WebsocketInfo:
         if from_redis:
             ser = {}
             for k, v in serialized_obj.items():
-                key_str = k.decode('utf8')
+                key_str = k.decode("utf8")
                 ser[key_str] = WebsocketInfo.redis_transformers(key_str)(v)
             serialized_obj = ser
 
         return dataclass_replace(new_obj, **serialized_obj)
 
     # methods required by flask-login
-    def is_authenticated(self):
-        return self._is_authenticated
+    def is_authenticated(self, session):
+        return session.get("_user_id") == f"user_{self.pk}"
 
     def is_active(
         self,
@@ -70,10 +89,10 @@ class WebsocketInfo:
         return True
 
     def is_anonymous(self):
-        return self.username == 'Uninitialized'
+        return self.username == "Uninitialized"
 
     def get_id(self):
-        return f'user_{self.pk}'
+        return f"user_{self.pk}"
 
     # end login required methods
 
@@ -88,10 +107,14 @@ class WebsocketInfo:
     def save_new_user(self, redis_client):
         self._check_not_overwriting(redis_client)
         redis_client.set(self.username, self.pk)
-        redis_client.hmset(f'user_{self.pk}', self.serialize(skip_list=['_is_authenticated']))
+        redis_client.hmset(
+            f"user_{self.pk}", self.serialize(skip_list=["_is_authenticated"])
+        )
 
     def _check_not_overwriting(self, redis_client):
-        pk_associated_with_my_username_dirty = redis_client.get(self.username)  # by dirty I mean, its bytes atm
+        pk_associated_with_my_username_dirty = redis_client.get(
+            self.username
+        )  # by dirty I mean, its bytes atm
         if not pk_associated_with_my_username_dirty:
             return
         pk = int(pk_associated_with_my_username_dirty)
@@ -100,12 +123,13 @@ class WebsocketInfo:
 
     @staticmethod
     def get_new_pk(redis_client):
-        return redis_client.incr('WEBSOCKET_PK')
+        return redis_client.incr("WEBSOCKET_PK")
 
 
 class MessageType(Enum):
-    USER_JOINED = 'userJoined'
+    USER_JOINED = "userJoined"
 
 
 class HTTP_STATUS_CODE(Enum):
+    HTTP_200_OK = 200
     HTTP_401_UNAUTHORIZED = 401
