@@ -45,6 +45,7 @@ The backend uses python and redis. [See here](@backend-1) for instructions on ho
     REDIS_PORT = 6379
     FLASK_SECRET_KEY = '' # GENERATE A SECRET KEY
     ```
+    * Generate a secret key [like so](https://stackoverflow.com/questions/34902378/where-do-i-get-a-secret-key-for-flask/34903502#34903502) and then put it in your `local_settings.py` file
 * **Make A User**
     * The code requires you have a user before logging in. In the `scripts` directory run `python create_user.py {email} {password}`, which will make a user record in your local redis db.
 
