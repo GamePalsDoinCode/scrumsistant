@@ -1,7 +1,6 @@
 from .structs import WebsocketInfo
 from .exceptions import *
 
-
 def get_user_by_email(email, redis_client):
     user_pk = redis_client.get(email)
     if not user_pk:
