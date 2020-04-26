@@ -17,5 +17,12 @@ end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
 
+#isort
+mulit_line_output = 3
+length_sort = true
+include_trailing_comma = true
+use_parentheses = true
+
+
 [*.py]
 max_line_length = 120
