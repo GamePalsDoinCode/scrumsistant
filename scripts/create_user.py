@@ -5,7 +5,7 @@ import sys
 import redis
 
 sys.path.insert(0, os.path.abspath(".."))
-__package__ = "scrumsistant"
+__package__ = "scrumsistant"  # pylint: disable=redefined-builtin
 from backend.structs import WebsocketInfo  # isort:skip
 
 try:
