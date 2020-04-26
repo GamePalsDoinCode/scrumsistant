@@ -36,6 +36,15 @@ The backend uses python and redis. [See here](@backend-1) for instructions on ho
     * [Install redis](https://redis.io/topics/quickstart) and, if you're feeling fancy, make it a ["proper service"](https://gist.github.com/hackedunit/a53f0b5376b3772d278078f686b04d38).
         * **Windows note:** I executed the installation commands from the first link in WSL, but now I can only run redis in Ubuntu. This is fine for me but perhaps you would like to find a better solution. Please do! 
     * Start the redis server locally
+* **Local Settings**
+    * Create a `backend/local_settings.py` file, and populate it like so:
+    ```python
+    SERVER_NAME = 'me'
+    REDIS_URL = 'localhost'
+    REDIS_PASSWORD = ''
+    REDIS_PORT = 6379
+    FLASK_SECRET_KEY = '' # GENERATE A SECRET KEY
+    ```
 * **Make A User**
     * The code requires you have a user before logging in. In the `scripts` directory run `python create_user.py {email} {password}`, which will make a user record in your local redis db.
 
