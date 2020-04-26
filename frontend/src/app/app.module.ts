@@ -13,6 +13,7 @@ import { PointingComponent } from './pointing/pointing.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StandupComponent } from './standup/standup.component';
 import { NavComponent } from './nav/nav.component';
+import { LoginPageComponent } from './login-page/login-page.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { NavComponent } from './nav/nav.component';
     PointingComponent,
     DashboardComponent,
     StandupComponent,
-    NavComponent
+    NavComponent,
+    LoginPageComponent
   ],
   imports: [
     BrowserModule,

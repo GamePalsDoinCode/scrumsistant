@@ -140,6 +140,9 @@ disable=print-statement,
         missing-module-docstring,
         missing-class-docstring,
         missing-function-docstring,
+        invalid-name,
+        line-too-long,
+        wrong-import-position,
         C0330,
         C0326
 
