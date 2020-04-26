@@ -4,13 +4,14 @@ from dataclasses import dataclass
 from dataclasses import replace as dataclass_replace
 from enum import Enum
 from typing import List, Optional
+from .exceptions import *
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
 @dataclass
 class WebsocketInfo:
-    pk: int  # pylint: diable
+    pk: int  # pylint: disable
     username: str = 'Uninitialized'
     password: Optional[str] = None
     _is_authenticated: bool = False
@@ -95,7 +96,7 @@ class WebsocketInfo:
             return
         pk = int(pk_associated_with_my_username_dirty)
         if self.pk != pk:
-            raise TypeError  # TODO implement custom error
+            raise UserNameTakenError
 
     @staticmethod
     def get_new_pk(redis_client):
