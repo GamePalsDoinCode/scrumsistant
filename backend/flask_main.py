@@ -66,7 +66,7 @@ def login():
 
     try:
         user = get_user_by_email(user_email, redis_client)
-    except TypeError:  # TODO implement custom exception type
+    except EntryNotFoundError:  # TODO implement custom exception type
         return not_allowed_return_val
 
     password_ok = user.check_password(incoming_password)
