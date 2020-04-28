@@ -11,7 +11,7 @@ from .structs import MessageType, WebsocketInfo
 from .utils import cleanup_redis_dict, transform_to_redis_safe_dict
 
 try:
-    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT
+    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT, REDIS_DB
 except:
     SERVER_NAME = "me"
     REDIS_URL = "localhost"
@@ -31,10 +31,7 @@ class Server:
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
 
         redis_pubsub_instance.subscribe(
-            **{
-                "websocket-IPC": self.websocket_ipc_handler,
-                "flask-IPC": self.flask_ipc_handler,
-            }
+            **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
 
@@ -60,9 +57,7 @@ class Server:
         print(dropped_user_pk, "socket deregistered")
         if dropped_user_pk:
             self.redis.delete(f"owns-connection-{dropped_user_pk}")
-            user_dict = cleanup_redis_dict(
-                self.redis.hgetall(f"user_{dropped_user_pk}")
-            )
+            user_dict = cleanup_redis_dict(self.redis.hgetall(f"user_{dropped_user_pk}"))
             self.redis.delete(f"user_{dropped_user_pk}")
             self.redis.srem("currentUserPKs", str(dropped_user_pk).encode("utf8"))
             message = {
@@ -101,9 +96,7 @@ class Server:
             to = data["broadcastTo"]
             message = data["message"]
             if to == "all":
-                task = loop.create_task(
-                    self.broadcast(message, publish_to_redis=False,)
-                )
+                task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
                 loop.run_until_complete(task)
 
     def flask_ipc_handler(self, redis_message):
@@ -115,9 +108,7 @@ class Server:
             message = data["message"]
             if to == "all":
                 print("sending flask message", message)
-                task = loop.create_task(
-                    self.broadcast(message, publish_to_redis=False,)
-                )
+                task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
                 loop.run_until_complete(task)
 
     async def router(self, websocket, path):

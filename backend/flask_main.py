@@ -12,7 +12,7 @@ from .structs import HTTP_STATUS_CODE, AnonymousUserWrapper, WebsocketInfo
 from .utils import cleanup_redis_dict
 
 try:
-    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT, FLASK_SECRET_KEY
+    from .local_settings import SERVER_NAME, REDIS_URL, REDIS_PASSWORD, REDIS_PORT, REDIS_DB, FLASK_SECRET_KEY
 except:
     SERVER_NAME = 'me'
     REDIS_URL = 'localhost'
