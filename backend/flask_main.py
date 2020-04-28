@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_redis import FlaskRedis
 
+from .exceptions import RedisKeyNotFoundError
 from .query_tools import get_user_by_email
 from .structs import HTTP_STATUS_CODE, AnonymousUserWrapper, WebsocketInfo
 from .utils import cleanup_redis_dict
