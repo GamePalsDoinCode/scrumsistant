@@ -1,8 +1,6 @@
-class EntryNotFoundError(Exception):
+class RedisKeyNotFoundError(Exception):
     pass
 
-class UserInfoNotFoundError(Exception):
-    pass
 
 class UserNameTakenError(Exception):
     pass
