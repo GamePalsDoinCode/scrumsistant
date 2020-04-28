@@ -8,6 +8,7 @@ from typing import List, Optional
 from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .exceptions import *
 from .utils import transform_to_redis_safe_dict
 
 
@@ -18,29 +19,23 @@ class AnonymousUserWrapper(AnonymousUserMixin):
     # To maintain ducktyping, we need this shell of a class
     # to expose a method for is_authenticated
     # it always returns False by definition (because this is a representation of a user prior to logging in)
-    def is_authenticated(
-        self, _
-    ):  # pylint: disable=arguments-differ,invalid-overridden-method
+    def is_authenticated(self, _):  # pylint: disable=arguments-differ,invalid-overridden-method
         return False
 
 
 @dataclass
 class WebsocketInfo:
-    pk: int  # pylint: diable
+    pk: int
     username: str = "Uninitialized"  # TODO this should either be email, or we should have email separate and this should be display name
     password: Optional[str] = None
 
     def serialize(
-        self,
-        skip_list: List[str] = None,
-        serialize_method=transform_to_redis_safe_dict,
+        self, skip_list: List[str] = None, serialize_method=transform_to_redis_safe_dict,
     ):
         if skip_list is None:
             skip_list = []
         serialized_form = dataclass_serialize(self)
-        reduced_serialized_form = {
-            k: v for k, v in serialized_form.items() if not k in skip_list
-        }
+        reduced_serialized_form = {k: v for k, v in serialized_form.items() if not k in skip_list}
         return serialize_method(reduced_serialized_form)
 
     @staticmethod
@@ -106,19 +101,15 @@ class WebsocketInfo:
     def save_new_user(self, redis_client):
         self._check_not_overwriting(redis_client)
         redis_client.set(self.username, self.pk)
-        redis_client.hmset(
-            f"user_{self.pk}", self.serialize(skip_list=["_is_authenticated"])
-        )
+        redis_client.hmset(f"user_{self.pk}", self.serialize(skip_list=["_is_authenticated"]))
 
     def _check_not_overwriting(self, redis_client):
-        pk_associated_with_my_username_dirty = redis_client.get(
-            self.username
-        )  # by dirty I mean, its bytes atm
+        pk_associated_with_my_username_dirty = redis_client.get(self.username)  # by dirty I mean, its bytes atm
         if not pk_associated_with_my_username_dirty:
             return
         pk = int(pk_associated_with_my_username_dirty)
         if self.pk != pk:
-            raise TypeError  # TODO implement custom error
+            raise UserNameTakenError
 
     @staticmethod
     def get_new_pk(redis_client):
