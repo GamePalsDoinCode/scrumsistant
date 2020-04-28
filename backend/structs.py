@@ -7,9 +7,8 @@ from typing import Any, Callable, Dict, Literal, Mapping, Optional, TypeVar, Uni
 from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .scrum_types import REDIS_CLIENT_TEMP_TYPE
 from .utils import transform_to_redis_safe_dict
-
-REDIS_CLIENT_TEMP_TYPE = Any
 
 
 class AnonymousUserWrapper(AnonymousUserMixin):
@@ -125,3 +124,4 @@ class MessageType(Enum):
 class HTTP_STATUS_CODE(Enum):
     HTTP_200_OK = 200
     HTTP_401_UNAUTHORIZED = 401
+    HTTP_404_NOT_FOUND = 404
