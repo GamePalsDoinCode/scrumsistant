@@ -66,7 +66,7 @@ def login():
 
     try:
         user = get_user_by_email(user_email, redis_client)
-    except EntryNotFoundError:
+    except RedisKeyNotFoundError:
         return not_allowed_return_val
 
     password_ok = user.check_password(incoming_password)
