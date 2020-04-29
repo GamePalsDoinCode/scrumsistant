@@ -8,6 +8,7 @@ from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .scrum_types import REDIS_CLIENT_TEMP_TYPE
+from .exceptions import *
 from .utils import transform_to_redis_safe_dict
 
 
@@ -110,7 +111,7 @@ class WebsocketInfo:
             return
         pk = int(pk_associated_with_my_username_dirty)
         if self.pk != pk:
-            raise TypeError  # TODO implement custom error
+            raise UserNameTakenError
 
     @staticmethod
     def get_new_pk(redis_client: REDIS_CLIENT_TEMP_TYPE) -> int:

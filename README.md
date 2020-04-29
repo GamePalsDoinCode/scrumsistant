@@ -43,6 +43,7 @@ The backend uses python and redis. [See here](@backend-1) for instructions on ho
     REDIS_URL = 'localhost'
     REDIS_PASSWORD = ''
     REDIS_PORT = 6379
+    REDIS_DB = 0
     FLASK_SECRET_KEY = '' # GENERATE A SECRET KEY
     ```
     * Generate a secret key [like so](https://stackoverflow.com/questions/34902378/where-do-i-get-a-secret-key-for-flask/34903502#34903502) and then put it in your `local_settings.py` file

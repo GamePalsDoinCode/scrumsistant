@@ -7,7 +7,9 @@ from flask_cors import CORS
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_redis import FlaskRedis
 
+
 from .local_settings import FLASK_SECRET_KEY, REDIS_DB, REDIS_PASSWORD, REDIS_PORT, REDIS_URL
+from .exceptions import RedisKeyNotFoundError
 from .query_tools import get_user_by_email
 from .scrum_types import FLASK_RESPONSE_TYPE
 from .structs import HTTP_STATUS_CODE, AnonymousUserWrapper, WebsocketInfo
@@ -59,7 +61,7 @@ def login() -> FLASK_RESPONSE_TYPE:
 
     try:
         user = get_user_by_email(user_email, redis_client)
-    except TypeError:  # TODO implement custom exception type
+    except RedisKeyNotFoundError:
         return not_allowed_return_val
 
     password_ok = user.check_password(incoming_password)
