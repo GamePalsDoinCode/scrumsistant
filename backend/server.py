@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 import functools
 import json
 import logging
@@ -28,12 +29,25 @@ class Server:
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict = {}
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
-        redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
+        atexit.register(self.shutdown_handler)
 
+        redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
+
+    async def _shutdown_helper(self, tasks):
+        await asyncio.gather(*tasks)
+
+    def shutdown_handler(self):
+        print('shutting down')
+        loop = asyncio.get_event_loop()
+        tasks = []
+        for websocket in self.websocket_info_dict.keys():
+            task = loop.create_task(self.unregister(websocket))
+            tasks.append(task)
+        loop.run_until_complete(self._shutdown_helper(tasks))
 
     async def register(self, websocket):
         next_pk = self.redis.incr("WEBSOCKET_PK")
