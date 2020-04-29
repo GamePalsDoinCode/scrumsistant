@@ -21,7 +21,7 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
 * **Frontend Package Dependencies**
     * Run `npm ci` to install any libraries we need. You will need to do this again whenever new dependencies are added. [Here's why](https://stackoverflow.com/a/53325242) we use this instead of `npm install`.
 * **TSLint**
-    * Run `npm install tslint typescript -g --save-dev` to install tslint
+    * Run `npm install tslint typescript -g` to install tslint
 ### Backend
 * **Python Virtual Environment**
     * **Danny:** 
@@ -71,7 +71,7 @@ Now you should be able to go to http://localhost:4200/ and login with the [user 
 ## Formatting
 
 ### Frontend
-We are using tslint to lint our code. Install it as per the [instructions above](#frontend-1), and then run `tslint --project .` in the `frontend` directory to run the linter and show you any errors that need to be fixed. If you are using VS Code, consider installing [the extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
+We are using tslint to lint our code. Install it as per the [instructions above](#frontend-1), and then run `tslint --project /path/to/project --config /path/to/project/tslint.json` in the `frontend` directory to run the linter and show you any errors that need to be fixed. If you are using VS Code, consider installing [the extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
 
 ### Backend
 We are formatting our backend code according to the standards imposed by the fascist maintaining [`black`](https://github.com/psf/black). We are also using the [`isort`](https://github.com/timothycrosley/isort) library. You can easily set up your IDE to auto-run these tools whenever you save, which I suggest (and can help with).
