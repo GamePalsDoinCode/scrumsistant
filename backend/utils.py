@@ -1,29 +1,17 @@
 import asyncio
 import json
 
-from .structs import get_info_dict, WebsocketInfo
-WEBSOCKET_INFO_DICT = get_info_dict()
+
+async def notify_users(payload, users=None):
+    if users is None:
+        users = WEBSOCKET_INFO_DICT.keys()
+    await asyncio.wait([user.send(payload) for user in users])
 
 
-async def register(websocket):
-	WEBSOCKET_INFO_DICT[websocket] = WebsocketInfo(
-		username = 'Uninitalized',
-	)
+def cleanup_redis_dict(dict_from_redis):
+    return {k.decode('utf8'): v.decode('utf8') for k, v in dict_from_redis.items()}
 
 
-async def unregister(websocket):
-	dropped_user_info = WEBSOCKET_INFO_DICT.pop(websocket, None)
-	if dropped_user_info:
-		payload = json.dumps({
-			'type': 'userLeft',
-			'usernamer': dropped_user_info.username
-		})
-		await notify_users(payload)
-
-
-async def notify_users(payload, users = None):
-	if users is None:
-		users = WEBSOCKET_INFO_DICT.keys()
-	await asyncio.wait([
-		user.send(payload) for user in users
-	])
+def transform_to_redis_safe_dict(dict_with_nones):
+    # this will turn any toplevel None values -> 'null'
+    return {k: 'null' if v is None else v for k, v in dict_with_nones.items()}

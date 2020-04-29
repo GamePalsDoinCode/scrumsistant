@@ -1,0 +1,21 @@
+<div style="margin-top: 15px;">
+  <div style="width: 85%; margin: auto;">
+    <img style="width: 500px; margin: auto;" src="../../assets/logo_v1.png">
+  </div>
+  <div>
+    <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
+      <span style="width: 120px; display: inline-block;">Email Address</span>
+      <input [(ngModel)]="potentialUser.email" placeholder="you@example.com" type="email" style="width: 200px;" email="true" [ngModelOptions]="{updateOn: 'blur'}" #prmEmail="ngModel"/>
+      <span *ngIf="prmEmail.errors?.email">That's a bad email, darling, and I think you can do better ;)</span>
+    </div>
+    <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
+      <span style="width: 120px; display: inline-block;">Password</span>
+        <input [(ngModel)]="potentialUser.password" type="password" style="width: 200px;"/>
+    </div>
+    <div>
+      <button [disabled]="prmEmail.errors?.email || this.potentialUser.password.length == 0" (click)="submitLogin()" style="width: 200px;margin-left: 135px;">
+        Lemme Scrum!
+      </button>
+    </div>
+  </div>
+</div>

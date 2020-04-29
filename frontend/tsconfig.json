@@ -4,6 +4,7 @@
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
+    "noImplicitAny": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
@@ -14,6 +15,9 @@
     "lib": [
       "es2018",
       "dom"
+    ],
+    "typeRoots": [
+      "types/scrum-types.d.ts"
     ]
   },
   "angularCompilerOptions": {
