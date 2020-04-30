@@ -32,6 +32,7 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
         * I [configure Pycharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html#) to handle this crap for me using `venv`.
 * **Backend Python Package Dependencies**
     * After setting up and activating your virtual environment, install all of the python libraries we need using `pip install -r requirements.txt` in the backend dir. You will need to do this again whenever new dependencies are added.
+    * We use [pip-tools](https://pypi.org/project/pip-tools/) to freeze our requirements (don't worry, it's included in the requirements). So any time you need to add a new requirement, please add it to the [requirements.in](https://github.com/GamePalsDoinCode/scrumsistant/blob/master/backend/requirements.in) file, then run `pip-compile requirements.in` (or `pip-compile.exe requirements.in` for the Windows heathens) to produce a requirements.txt file with the properly frozen further level requirements.
 * **Code Formatting Enforcement**
     * Create a local pre-commit hook by following the [instructions below](#Enforced-formatting-via-pre-commit-hooks).
 * **Redis**
