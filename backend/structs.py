@@ -9,6 +9,7 @@ from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .exceptions import *
+from .redis_schema import *
 from .utils import transform_to_redis_safe_dict
 
 
@@ -75,7 +76,7 @@ class WebsocketInfo:
 
     # methods required by flask-login
     def is_authenticated(self, session):
-        return session.get("_user_id") == f"user_{self.pk}"
+        return session.get("_user_id") == Users(self.pk)
 
     def is_active(
         self,
@@ -86,7 +87,7 @@ class WebsocketInfo:
         return self.username == "Uninitialized"
 
     def get_id(self):
-        return f"user_{self.pk}"
+        return Users(self.pk)
 
     # end login required methods
 
@@ -100,11 +101,13 @@ class WebsocketInfo:
 
     def save_new_user(self, redis_client):
         self._check_not_overwriting(redis_client)
-        redis_client.set(self.username, self.pk)
-        redis_client.hmset(f"user_{self.pk}", self.serialize(skip_list=["_is_authenticated"]))
+        redis_client.set(PKByEmail(self.username), self.pk)
+        redis_client.hmset(Users(self.pk), self.serialize(skip_list=["_is_authenticated"]))
 
     def _check_not_overwriting(self, redis_client):
-        pk_associated_with_my_username_dirty = redis_client.get(self.username)  # by dirty I mean, its bytes atm
+        pk_associated_with_my_username_dirty = redis_client.get(
+            PKByEmail(self.username)
+        )  # by dirty I mean, its bytes atm
         if not pk_associated_with_my_username_dirty:
             return
         pk = int(pk_associated_with_my_username_dirty)
