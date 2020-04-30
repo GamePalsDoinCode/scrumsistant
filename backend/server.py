@@ -22,7 +22,6 @@ class Server:
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
-        atexit.register(self.shutdown_handler)
 
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
@@ -30,7 +29,7 @@ class Server:
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
 
-    async def _shutdown_helper(self, tasks: List[Task[None]]) -> None:
+    async def _shutdown_helper(self, tasks: List[Task]) -> None:
         await asyncio.gather(*tasks)
 
     def shutdown_handler(self) -> None:
@@ -143,5 +142,6 @@ class Server:
         if loop is None:
             loop = asyncio.get_event_loop()
 
+        atexit.register(self.shutdown_handler)
         loop.run_until_complete(start_server)
         loop.run_forever()
