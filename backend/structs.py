@@ -24,9 +24,6 @@ class AnonymousUserWrapper(AnonymousUserMixin):
         return False
 
 
-T = TypeVar('T')
-
-
 @dataclass
 class WebsocketInfo:
     pk: int
