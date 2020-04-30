@@ -92,8 +92,8 @@ def current_users() -> FLASK_RESPONSE_TYPE:
     if request.method == 'GET':
         current_pks = [Users(pk) for pk in redis_client.smembers(CurrentUsers())]
         pipe = redis_client.pipeline()
-        for pk in current_pks:
-            pipe.hgetall(Users(pk))
+        for table_key in current_pks:
+            pipe.hgetall(table_key)
         current_user_dicts = [cleanup_redis_dict(user) for user in pipe.execute() if user]
         current_usernames = [user['username'] for user in current_user_dicts]
         return json.dumps(current_usernames)
