@@ -1,5 +1,7 @@
 from typing import Any, Dict, Tuple, Union
 
+REDIS_SAFE_DICT = Dict[str, Union[str, int, bool]]
+
 REDIS_CLIENT_TEMP_TYPE = Any
 WEBSOCKET_TEMP_TYPE = Any
 

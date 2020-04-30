@@ -1,4 +1,6 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict
+
+from .scrum_types import REDIS_SAFE_DICT
 
 # import asyncio
 # async def notify_users(payload, users=None):
@@ -9,9 +11,6 @@ from typing import Any, Dict, Union
 
 def cleanup_redis_dict(dict_from_redis: Dict[bytes, bytes]) -> Dict[str, str]:
     return {k.decode('utf8'): v.decode('utf8') for k, v in dict_from_redis.items()}
-
-
-REDIS_SAFE_DICT = Dict[str, Union[str, int, bool]]
 
 
 def transform_to_redis_safe_dict(dict_with_nones: Dict[Any, Any]) -> REDIS_SAFE_DICT:
