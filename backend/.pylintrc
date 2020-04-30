@@ -143,6 +143,7 @@ disable=print-statement,
         invalid-name,
         line-too-long,
         wrong-import-position,
+        too-few-public-methods,
         C0330,
         C0326
 

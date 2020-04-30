@@ -9,9 +9,10 @@ import redis
 import websockets
 
 from .local_settings import REDIS_DB, REDIS_PORT, REDIS_URL, SERVER_NAME
+from .redis_schema import *
 from .scrum_types import WEBSOCKET_TEMP_TYPE
-from .structs import WebsocketInfo
-from .utils import cleanup_redis_dict
+from .structs import MessageType, WebsocketInfo
+from .utils import cleanup_redis_dict, transform_to_redis_safe_dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,15 +43,15 @@ class Server:
         loop.run_until_complete(self._shutdown_helper(tasks))
 
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
-        next_pk = self.redis.incr("WEBSOCKET_PK")
+        next_pk = WebsocketInfo.get_new_pk(self.redis)
         new_user_obj = WebsocketInfo(pk=next_pk, username="Uninitialized",)
         self.websocket_info_dict[websocket] = new_user_obj.pk
         print("registered", self.websocket_info_dict)
         self.redis.set(
-            f"owns-connection-{new_user_obj.pk}", self.SERVER_NAME,
+            OwnsConnection(new_user_obj.pk), self.SERVER_NAME,
         )
-        self.redis.hmset(f"user_{new_user_obj.pk}", new_user_obj.serialize())
-        self.redis.sadd("currentUserPKs", new_user_obj.pk)
+        self.redis.hmset(Users(new_user_obj.pk), new_user_obj.serialize())
+        self.redis.sadd(CurrentUsers(), new_user_obj.pk)
         socket_message = {
             "type": "confirmJoined",
             "pk": new_user_obj.pk,
@@ -62,10 +63,10 @@ class Server:
         dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
         print(dropped_user_pk, "socket deregistered")
         if dropped_user_pk:
-            self.redis.delete(f"owns-connection-{dropped_user_pk}")
-            user_dict = cleanup_redis_dict(self.redis.hgetall(f"user_{dropped_user_pk}"))
-            self.redis.delete(f"user_{dropped_user_pk}")
-            self.redis.srem("currentUserPKs", str(dropped_user_pk).encode("utf8"))
+            self.redis.delete(OwnsConnection(dropped_user_pk))
+            user_dict = cleanup_redis_dict(self.redis.hgetall(Users(dropped_user_pk)))
+            self.redis.delete(Users(dropped_user_pk))
+            self.redis.srem(CurrentUsers(), str(dropped_user_pk).encode("utf8"))
             message = {
                 "type": "userLeft",
                 "pk": dropped_user_pk,
