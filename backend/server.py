@@ -2,7 +2,8 @@ import asyncio
 import atexit
 import json
 import logging
-from typing import Any, Callable, Dict, Iterable
+from asyncio import Task
+from typing import Any, Callable, Dict, Iterable, List
 
 import redis
 import websockets
@@ -30,14 +31,14 @@ class Server:
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
 
-    async def _shutdown_helper(self, tasks):
+    async def _shutdown_helper(self, tasks: List[Task[None]]) -> None:
         await asyncio.gather(*tasks)
 
-    def shutdown_handler(self):
+    def shutdown_handler(self) -> None:
         print('shutting down')
         loop = asyncio.get_event_loop()
         tasks = []
-        for websocket in self.websocket_info_dict.keys():
+        for websocket in self.websocket_info_dict:
             task = loop.create_task(self.unregister(websocket))
             tasks.append(task)
         loop.run_until_complete(self._shutdown_helper(tasks))
