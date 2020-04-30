@@ -1,15 +1,18 @@
 import asyncio
+import atexit
 import json
 import logging
-from typing import Any, Callable, Dict, Iterable
+from asyncio import Task
+from typing import Any, Callable, Dict, Iterable, List
 
 import redis
 import websockets
 
 from .local_settings import REDIS_DB, REDIS_PORT, REDIS_URL, SERVER_NAME
+from .redis_schema import *
 from .scrum_types import WEBSOCKET_TEMP_TYPE
-from .structs import WebsocketInfo
-from .utils import cleanup_redis_dict
+from .structs import MessageType, WebsocketInfo
+from .utils import cleanup_redis_dict, transform_to_redis_safe_dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -20,23 +23,35 @@ class Server:
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
-        redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
 
+        redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
 
+    async def _shutdown_helper(self, tasks: List[Task]) -> None:
+        await asyncio.gather(*tasks)
+
+    def shutdown_handler(self) -> None:
+        print('shutting down')
+        loop = asyncio.get_event_loop()
+        tasks = []
+        for websocket in self.websocket_info_dict:
+            task = loop.create_task(self.unregister(websocket))
+            tasks.append(task)
+        loop.run_until_complete(self._shutdown_helper(tasks))
+
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
-        next_pk = self.redis.incr("WEBSOCKET_PK")
+        next_pk = WebsocketInfo.get_new_pk(self.redis)
         new_user_obj = WebsocketInfo(pk=next_pk, username="Uninitialized",)
         self.websocket_info_dict[websocket] = new_user_obj.pk
         print("registered", self.websocket_info_dict)
         self.redis.set(
-            f"owns-connection-{new_user_obj.pk}", self.SERVER_NAME,
+            OwnsConnection(new_user_obj.pk), self.SERVER_NAME,
         )
-        self.redis.hmset(f"user_{new_user_obj.pk}", new_user_obj.serialize())
-        self.redis.sadd("currentUserPKs", new_user_obj.pk)
+        self.redis.hmset(Users(new_user_obj.pk), new_user_obj.serialize())
+        self.redis.sadd(CurrentUsers(), new_user_obj.pk)
         socket_message = {
             "type": "confirmJoined",
             "pk": new_user_obj.pk,
@@ -48,10 +63,10 @@ class Server:
         dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
         print(dropped_user_pk, "socket deregistered")
         if dropped_user_pk:
-            self.redis.delete(f"owns-connection-{dropped_user_pk}")
-            user_dict = cleanup_redis_dict(self.redis.hgetall(f"user_{dropped_user_pk}"))
-            self.redis.delete(f"user_{dropped_user_pk}")
-            self.redis.srem("currentUserPKs", str(dropped_user_pk).encode("utf8"))
+            self.redis.delete(OwnsConnection(dropped_user_pk))
+            user_dict = cleanup_redis_dict(self.redis.hgetall(Users(dropped_user_pk)))
+            self.redis.delete(Users(dropped_user_pk))
+            self.redis.srem(CurrentUsers(), str(dropped_user_pk).encode("utf8"))
             message = {
                 "type": "userLeft",
                 "pk": dropped_user_pk,
@@ -128,5 +143,6 @@ class Server:
         if loop is None:
             loop = asyncio.get_event_loop()
 
+        atexit.register(self.shutdown_handler)
         loop.run_until_complete(start_server)
         loop.run_forever()

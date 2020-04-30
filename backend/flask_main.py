@@ -7,10 +7,10 @@ from flask_cors import CORS
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_redis import FlaskRedis
 
-
-from .local_settings import FLASK_SECRET_KEY, REDIS_DB, REDIS_PASSWORD, REDIS_PORT, REDIS_URL
 from .exceptions import RedisKeyNotFoundError
+from .local_settings import FLASK_SECRET_KEY, REDIS_DB, REDIS_PASSWORD, REDIS_PORT, REDIS_URL
 from .query_tools import get_user_by_email
+from .redis_schema import *
 from .scrum_types import FLASK_RESPONSE_TYPE
 from .structs import HTTP_STATUS_CODE, AnonymousUserWrapper, WebsocketInfo
 from .utils import cleanup_redis_dict
@@ -42,8 +42,8 @@ def public_endpoint(function):
 
 
 @login_service.user_loader
-def load_user(pk: int) -> Optional[WebsocketInfo]:
-    user_dict = redis_client.hgetall(pk)
+def load_user(table_key: str) -> Optional[WebsocketInfo]:
+    user_dict = redis_client.hgetall(table_key)
     if user_dict:
         user = WebsocketInfo.deserialize(user_dict)
         return user
@@ -89,15 +89,13 @@ def is_authenticated() -> FLASK_RESPONSE_TYPE:
 
 @app.route('/current_users', methods=['GET', 'POST',])
 def current_users() -> FLASK_RESPONSE_TYPE:
-    print(f'current_users {request.method}')
     if request.method == 'GET':
-        current_pks = [f'user_{int(pk)}' for pk in redis_client.smembers('currentUserPKs')]
+        current_pks = [Users(pk) for pk in redis_client.smembers(CurrentUsers())]
         pipe = redis_client.pipeline()
         for pk in current_pks:
-            pipe.hgetall(pk)
+            pipe.hgetall(Users(pk))
         current_user_dicts = [cleanup_redis_dict(user) for user in pipe.execute() if user]
         current_usernames = [user['username'] for user in current_user_dicts]
-        print(current_usernames)
         return json.dumps(current_usernames)
     elif request.method == 'POST':
         user = current_user
@@ -105,8 +103,8 @@ def current_users() -> FLASK_RESPONSE_TYPE:
         post_data = request.get_json()
         user_name = post_data['username']
         # TODO - run this through the user.save method n stuff
-        redis_client.hset(f'user_{user_pk}', 'username', user_name)
-        user_dict = {k.decode('utf8'): v.decode('utf8') for k, v in redis_client.hgetall(f'user_{user_pk}').items()}
+        redis_client.hset(Users(user_pk), 'username', user_name)
+        user_dict = {k.decode('utf8'): v.decode('utf8') for k, v in redis_client.hgetall(Users(user_pk)).items()}
         message_for_browser = {
             'type': 'userJoined',
             'name': user_dict['username'],
