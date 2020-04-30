@@ -7,7 +7,7 @@ The frontend uses typescript and angular. [See here](#frontend-1) for instructio
 
 ## Backend
 
-The backend uses python and redis. [See here](@backend-1) for instructions on how to get started and [here](#backend-2) for how to run the code after.
+The backend uses python and redis. [See here](#backend-1) for instructions on how to get started and [here](#backend-2) for how to run the code after.
 
 # Getting Started
 
@@ -20,6 +20,8 @@ The backend uses python and redis. [See here](@backend-1) for instructions on ho
     * Install [angular CLI](https://cli.angular.io) with `npm install -g @angular/cli`
 * **Frontend Package Dependencies**
     * Run `npm ci` to install any libraries we need. You will need to do this again whenever new dependencies are added. [Here's why](https://stackoverflow.com/a/53325242) we use this instead of `npm install`.
+* **TSLint**
+    * Run `npm install tslint typescript -g` to install tslint
 ### Backend
 * **Python Virtual Environment**
     * **Danny:** 
@@ -30,6 +32,7 @@ The backend uses python and redis. [See here](@backend-1) for instructions on ho
         * I [configure Pycharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html#) to handle this crap for me using `venv`.
 * **Backend Python Package Dependencies**
     * After setting up and activating your virtual environment, install all of the python libraries we need using `pip install -r requirements.txt` in the backend dir. You will need to do this again whenever new dependencies are added.
+    * We use [pip-tools](https://pypi.org/project/pip-tools/) to freeze our requirements (don't worry, it's included in the requirements). So any time you need to add a new requirement, please add it to the [requirements.in](https://github.com/GamePalsDoinCode/scrumsistant/blob/master/backend/requirements.in) file, then run `pip-compile requirements.in` (or `pip-compile.exe requirements.in` for the Windows heathens) to produce a requirements.txt file with the properly frozen further level requirements.
 * **Code Formatting Enforcement**
     * Create a local pre-commit hook by following the [instructions below](#Enforced-formatting-via-pre-commit-hooks).
 * **Redis**
@@ -68,6 +71,11 @@ Now you should be able to go to http://localhost:4200/ and login with the [user 
 # Coding Standards
 
 ## Formatting
+
+### Frontend
+We are using tslint to lint our code. Install it as per the [instructions above](#frontend-1), and then run `tslint --project /path/to/project --config /path/to/project/tslint.json` in the `frontend` directory to run the linter and show you any errors that need to be fixed. If you are using VS Code, consider installing [the extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
+
+### Backend
 We are formatting our backend code according to the standards imposed by the fascist maintaining [`black`](https://github.com/psf/black). We are also using the [`isort`](https://github.com/timothycrosley/isort) library. You can easily set up your IDE to auto-run these tools whenever you save, which I suggest (and can help with).
 
 ## Enforced formatting via pre-commit hooks
