@@ -8,7 +8,7 @@ from typing import Dict, Iterable, List, cast
 import redis
 import websockets
 
-from .local_settings import REDIS_DB, REDIS_PORT, REDIS_URL, SERVER_NAME
+from .local_settings import REDIS_CONNECTION_URL, SERVER_NAME
 from .redis_schema import CurrentUsers, OwnsConnection, Users
 from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
 from .structs import WebsocketInfo
@@ -22,8 +22,7 @@ class Server:
         LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
-        self.redis: RedisClient = cast(RedisClient, redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,))
-
+        self.redis: RedisClient = cast(RedisClient, redis.Redis.from_url(REDIS_CONNECTION_URL))
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
