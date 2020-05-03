@@ -1,9 +1,18 @@
 import pytest
 import websockets
 
+from ..flask_main import create_app as create_flask_server
 from ..server import Server
 
 WEBSOCKET_URI = "ws://localhost:8000"
+
+
+@pytest.fixture
+def flask_client():
+    test_config = {'TESTING': True}
+    app = create_flask_server(test_config=test_config)
+    with app.test_client() as flask_client_obj:
+        yield flask_client_obj
 
 
 @pytest.fixture

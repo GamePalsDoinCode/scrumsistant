@@ -19,10 +19,17 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.secret_key = FLASK_SECRET_KEY
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # login session lifetime.  can be any timedelta obj
-    app.config['REDIS_URL'] = REDIS_CONNECTION_URL
-    redis_client: RedisClient = FlaskRedis(app)
-    app.redis_client = redis_client
+    if test_config:
+        from fakeredis import FakeRedis
+
+        redis_client: RedisClient = FlaskRedis.from_custom_provider(FakeRedis)
+        app.config.update(test_config)
+    else:
+        app.config['REDIS_URL'] = REDIS_CONNECTION_URL
+        redis_client: RedisClient = FlaskRedis(app)
+
     # redis_pub_sub = redis_client.pubsub(ignore_subscribe_messages=True,)
+    app.redis_client = redis_client
     login_service = LoginManager(app)
     app.login_service = login_service
     login_service.anonymous_user = AnonymousUserWrapper
