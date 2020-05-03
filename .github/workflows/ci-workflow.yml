@@ -22,5 +22,8 @@ jobs:
         pylint backend/ --exit-zero
     - name: Test with pytest
       run: |
-        pip install pytest
-        pytest
+        coverage run -m pytest backend/
+    - name: Get coverage report
+      run: |
+        coverage report -m
+
