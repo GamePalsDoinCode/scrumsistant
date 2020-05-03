@@ -19,7 +19,7 @@ jobs:
         pip install -r backend/requirements.txt
     - name: Lint with pylint
       run: |
-        pylint backend/
+        pylint backend/ --exit-zero
     - name: Test with pytest
       run: |
         pip install pytest
