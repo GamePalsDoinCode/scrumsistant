@@ -1,17 +1,27 @@
-from .redis_schema_base import RedisTable
+from .scrum_types import RedisKey, RedisKeyAllowedInput
 
 
-class OwnsConnection(RedisTable):
-    table_template = 'owns-connection:{}'
+def _table_base(table_name: str, template_val: RedisKeyAllowedInput) -> RedisKey:
+    if isinstance(template_val, bytes):
+        template_val = template_val.decode('utf8')
+    return RedisKey(table_name.format(str(template_val)))
 
 
-class PKByEmail(RedisTable):
-    table_template = 'email:{}'
+def OwnsConnection(template_val: RedisKeyAllowedInput) -> RedisKey:
+    return _table_base('owns-connection:{}', template_val)
 
 
-class Users(RedisTable):
-    table_template = 'user:{}'
+def PKByEmail(template_val: RedisKeyAllowedInput) -> RedisKey:
+    return _table_base('email:{}', template_val)
 
 
-class CurrentUsers(RedisTable):
-    table_template = 'currentUserPKs'
+def Users(template_val: RedisKeyAllowedInput) -> RedisKey:
+    return _table_base('user:{}', template_val)
+
+
+def CurrentUsers() -> RedisKey:
+    return _table_base('currentUserPks', '')
+
+
+def CurrentPKTable() -> RedisKey:
+    return _table_base('WEBSOCKET_PK', '')

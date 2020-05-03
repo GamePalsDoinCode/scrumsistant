@@ -21,9 +21,9 @@ async def client():
 
 @pytest.fixture
 async def send_message(server, client):
-    async def send_message(message):
+    async def _send_message(message):
         await client.send(message)
         greeting = await client.recv()
         return greeting
 
-    return send_message
+    return _send_message

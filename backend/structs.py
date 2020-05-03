@@ -2,14 +2,14 @@ from dataclasses import asdict as dataclass_serialize
 from dataclasses import dataclass
 from dataclasses import replace as dataclass_replace
 from enum import Enum
-from typing import Any, Callable, Dict, Literal, Mapping, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, Literal, Mapping, Optional, Union
 
 from flask_login import AnonymousUserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .exceptions import *
-from .redis_schema import *
-from .scrum_types import REDIS_CLIENT_TEMP_TYPE
+from .exceptions import UserNameTakenError
+from .redis_schema import CurrentPKTable, PKByEmail, Users
+from .scrum_types import RedisClient
 from .utils import transform_to_redis_safe_dict
 
 
@@ -98,12 +98,12 @@ class WebsocketInfo:
             return False
         return check_password_hash(self.password, password)
 
-    def save_new_user(self, redis_client: REDIS_CLIENT_TEMP_TYPE) -> None:
+    def save_new_user(self, redis_client: RedisClient) -> None:
         self._check_not_overwriting(redis_client)
         redis_client.set(PKByEmail(self.username), self.pk)
         redis_client.hmset(Users(self.pk), self.serialize(skip_list=["_is_authenticated"]))
 
-    def _check_not_overwriting(self, redis_client: REDIS_CLIENT_TEMP_TYPE) -> None:
+    def _check_not_overwriting(self, redis_client: RedisClient) -> None:
         pk_associated_with_my_username_dirty = redis_client.get(
             PKByEmail(self.username)
         )  # by dirty I mean, its bytes atm
@@ -114,8 +114,8 @@ class WebsocketInfo:
             raise UserNameTakenError
 
     @staticmethod
-    def get_new_pk(redis_client: REDIS_CLIENT_TEMP_TYPE) -> int:
-        return redis_client.incr("WEBSOCKET_PK")
+    def get_new_pk(redis_client: RedisClient) -> int:
+        return int(redis_client.incr(CurrentPKTable()))
 
 
 class MessageType(Enum):
