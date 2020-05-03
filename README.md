@@ -1,3 +1,5 @@
+![](https://github.com/GamePalsDoinCode/scrumsistant/workflows/coverage/badge.svg)
+
 # scrumsistant
 Assistant for Scrum Stuff
 
