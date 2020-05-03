@@ -3,11 +3,13 @@ import json
 from flask import request
 from flask_login import current_user
 
-from .flask_main import app, redis_client
+from .flask_main import app
 from .redis_schema import CurrentUsers, Users
 from .scrum_types import FLASK_RESPONSE_TYPE
 from .structs import HTTP_STATUS_CODE
 from .utils import cleanup_redis_dict
+
+redis_client = app.redis_client
 
 
 @app.route('/current_users', methods=['GET', 'POST',])

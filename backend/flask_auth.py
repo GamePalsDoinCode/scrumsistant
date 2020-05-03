@@ -5,12 +5,15 @@ from flask import abort, current_app, request, session
 from flask_login import current_user, login_user, logout_user
 
 from .exceptions import RedisKeyNotFoundError
-from .flask_main import app, login_service, public_endpoint, redis_client
+from .flask_main import app, public_endpoint
 from .query_tools import get_user_by_email
 from .redis_schema import CurrentUsers, Users
 from .scrum_types import FLASK_RESPONSE_TYPE, RedisKey
 from .structs import HTTP_STATUS_CODE, WebsocketInfo
 from .utils import cleanup_redis_dict
+
+redis_client = app.redis_client
+login_service = app.login_service
 
 
 @app.before_request
