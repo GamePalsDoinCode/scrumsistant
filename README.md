@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/GamePalsDoinCode/scrumsistant.svg?branch=master)](https://travis-ci.org/GamePalsDoinCode/scrumsistant)
 [![Coverage Status](https://coveralls.io/repos/github/GamePalsDoinCode/scrumsistant/badge.svg?branch=master)](https://coveralls.io/github/GamePalsDoinCode/scrumsistant?branch=master)
 
 # scrumsistant
