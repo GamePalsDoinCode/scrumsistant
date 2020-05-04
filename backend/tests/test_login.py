@@ -1,6 +1,6 @@
 import pytest
 
-from .fixtures import flask_client, websocket_server
+from .app_fixtures import flask_client, websocket_server
 
 
 @pytest.mark.asyncio

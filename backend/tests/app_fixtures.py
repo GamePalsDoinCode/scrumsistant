@@ -3,7 +3,6 @@ import pytest
 import websockets
 
 from ..flask_main import create_app as create_flask_server
-from ..flask_main import import_routes as import_flask_routes
 from ..server import Server
 
 WEBSOCKET_URI = "ws://localhost:8000"
