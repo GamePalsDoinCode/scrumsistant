@@ -8,4 +8,5 @@ logger = logging.getLogger(__name__)
 
 s = Server()
 logger.info("Starting up")
+print("Starting Server...")
 s.run()
