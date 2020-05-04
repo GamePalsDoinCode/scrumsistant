@@ -10,8 +10,8 @@ from flask_redis import FlaskRedis
 from .exceptions import RedisKeyNotFoundError
 from .local_settings import FLASK_SECRET_KEY, REDIS_DB, REDIS_PASSWORD, REDIS_PORT, REDIS_URL
 from .query_tools import get_user_by_email
-from .redis_schema import *
-from .scrum_types import FLASK_RESPONSE_TYPE
+from .redis_schema import CurrentUsers, Users
+from .scrum_types import FLASK_RESPONSE_TYPE, RedisClient, RedisKey
 from .structs import HTTP_STATUS_CODE, AnonymousUserWrapper, WebsocketInfo
 from .utils import cleanup_redis_dict
 
@@ -21,7 +21,8 @@ app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # login session lifetime.  can be any timedelta obj
 CORS(app)
-redis_client = FlaskRedis(app)
+redis_client: RedisClient = FlaskRedis(app)
+
 redis_pub_sub = redis_client.pubsub(ignore_subscribe_messages=True,)
 login_service = LoginManager(app)
 login_service.anonymous_user = AnonymousUserWrapper
@@ -42,7 +43,7 @@ def public_endpoint(function):
 
 
 @login_service.user_loader
-def load_user(table_key: str) -> Optional[WebsocketInfo]:
+def load_user(table_key: RedisKey) -> Optional[WebsocketInfo]:
     user_dict = redis_client.hgetall(table_key)
     if user_dict:
         user = WebsocketInfo.deserialize(user_dict)

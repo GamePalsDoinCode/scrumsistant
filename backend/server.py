@@ -3,16 +3,16 @@ import atexit
 import json
 import logging
 from asyncio import Task
-from typing import Any, Callable, Dict, Iterable, List
+from typing import Dict, Iterable, List, cast
 
 import redis
 import websockets
 
 from .local_settings import REDIS_DB, REDIS_PORT, REDIS_URL, SERVER_NAME
-from .redis_schema import *
-from .scrum_types import WEBSOCKET_TEMP_TYPE
-from .structs import MessageType, WebsocketInfo
-from .utils import cleanup_redis_dict, transform_to_redis_safe_dict
+from .redis_schema import CurrentUsers, OwnsConnection, Users
+from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
+from .structs import WebsocketInfo
+from .utils import cleanup_redis_dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class Server:
         LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
-        self.redis = redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,)
+        self.redis: RedisClient = cast(RedisClient, redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,))
 
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
@@ -66,7 +66,7 @@ class Server:
             self.redis.delete(OwnsConnection(dropped_user_pk))
             user_dict = cleanup_redis_dict(self.redis.hgetall(Users(dropped_user_pk)))
             self.redis.delete(Users(dropped_user_pk))
-            self.redis.srem(CurrentUsers(), str(dropped_user_pk).encode("utf8"))
+            self.redis.srem(CurrentUsers(), str(dropped_user_pk))
             message = {
                 "type": "userLeft",
                 "pk": dropped_user_pk,
