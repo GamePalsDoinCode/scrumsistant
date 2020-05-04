@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from fakeredis import FakeRedis
 from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
@@ -15,12 +16,18 @@ def public_endpoint(function):
     return function
 
 
+def import_routes():
+    # these need to be below the app init to avoid circular imports
+    # pylint: disable=unused-import
+    from . import flask_auth  # isort:skip
+    from . import flask_current_users_api  # isort:skip
+
+
 def create_app(test_config=None):
     app = Flask(__name__)
     app.secret_key = FLASK_SECRET_KEY
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # login session lifetime.  can be any timedelta obj
     if test_config:
-        from fakeredis import FakeRedis
 
         redis_client: RedisClient = FlaskRedis.from_custom_provider(FakeRedis)
         app.config.update(test_config)
@@ -39,7 +46,4 @@ def create_app(test_config=None):
 
 app = create_app()
 
-# these need to be below the app init to avoid circular imports
-# pylint: disable=unused-import
-from . import flask_auth  # isort:skip
-from . import flask_current_users_api  # isort:skip
+import_routes()
