@@ -1,0 +1,9 @@
+language: python
+python: 
+  - 3.6
+install:
+  - pip install -r backend/requirements.txt
+script:
+  - coverage run -m pytest backend/
+after_success:
+  - coveralls

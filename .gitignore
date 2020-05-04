@@ -11,5 +11,4 @@ backend/local_settings.py
 *.log
 *.log.*
 .mypy_cache
-backend/tests/.coverage
 **/.coverage

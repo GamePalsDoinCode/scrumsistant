@@ -17,3 +17,4 @@ fakeredis==1.4.0
 pytest-cov==2.8.1
 pytest-faker==2.0.0
 Faker==4.0.3
+coveralls==2.0.0
