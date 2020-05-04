@@ -3,7 +3,7 @@ import logging.handlers
 import platform
 
 
-def init_logging():
+def init_logging() -> None:
     logging_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     log_filename = "/var/log/scrumsistant/scrum.log"
     if platform.system() == "Windows":
