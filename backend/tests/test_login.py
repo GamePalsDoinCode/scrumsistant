@@ -53,3 +53,13 @@ def test_is_authenticated_fails_after_logging_out(logged_in_user, flask_client):
     flask_client.get('logout')
     rv = flask_client.get('is_authenticated')
     assert rv.status_code == 401
+
+
+def test_login_required_by_default_decorator_works(logged_in_user, flask_client):
+    # first, hit any endpoint while not logged in, get a 401
+    rv = flask_client.get('current_users')
+    assert rv.status_code == 401
+    # now, log in, hit same endpoint.  Don't care about the response, just that its not a 401
+    logged_in_user()
+    rv = flask_client.get('current_users')
+    assert rv.status_code != 401

@@ -7,7 +7,6 @@ from .scrum_types import RedisKey
 from .structs import WebsocketInfo
 
 
-# @app.before_request
 def login_required_by_default() -> None:
     login_valid = current_user.is_authenticated(session)
     if login_valid or getattr(current_app.view_functions[request.endpoint], 'is_public', False):
