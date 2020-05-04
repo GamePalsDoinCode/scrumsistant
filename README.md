@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/GamePalsDoinCode/scrumsistant/badge.svg?branch=master)](https://coveralls.io/github/GamePalsDoinCode/scrumsistant?branch=master)
+
 # scrumsistant
 Assistant for Scrum Stuff
 
