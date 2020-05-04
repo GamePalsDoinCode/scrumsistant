@@ -17,3 +17,19 @@ def user(websocket_server, faker):
         return new_user
 
     return _user
+
+
+@pytest.fixture
+def logged_in_user(user, flask_client):
+    def _logged_in_user(email=None, password=None):
+        if not password:
+            password = 'elephants-are-always-purple!##'
+        new_user = user(email=email, password=password)
+        post_data = {
+            'email': new_user.username,
+            'password': password,
+        }
+        flask_client.post('login', json=post_data)
+        return new_user
+
+    return _logged_in_user

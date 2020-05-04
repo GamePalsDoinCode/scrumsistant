@@ -30,3 +30,26 @@ def test_login_success_with_right_password(flask_client, user):
     }
     rv = flask_client.post('login', json=post_data)
     assert rv.status_code == 200
+
+
+def test_logout_with_noone_logged_in_is_fine(flask_client):
+    rv = flask_client.get('logout')
+    assert rv.status_code == 200
+
+
+def test_is_authenticated_fails_when_not_logged_in(flask_client):
+    rv = flask_client.get('is_authenticated')
+    assert rv.status_code == 401
+
+
+def test_is_authenticated_succeeds_when_logged_in(logged_in_user, flask_client):
+    logged_in_user()
+    rv = flask_client.get('is_authenticated')
+    assert rv.status_code == 200
+
+
+def test_is_authenticated_fails_after_logging_out(logged_in_user, flask_client):
+    logged_in_user()
+    flask_client.get('logout')
+    rv = flask_client.get('is_authenticated')
+    assert rv.status_code == 401
