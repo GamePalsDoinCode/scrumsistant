@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 import websockets
 
-from .fixtures import client, send_message, server
+# from .fixtures import client, send_message, server
 
 WEBSOCKET_URI = "ws://localhost:8000"
 
