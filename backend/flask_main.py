@@ -24,7 +24,7 @@ def create_app(test_config=None):
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # login session lifetime.  can be any timedelta obj
 
     if test_config:
-        redis_client: RedisClient = FakeRedis()
+        redis_client: RedisClient = test_config['redis']
         app.config.update(test_config)
     else:
         app.config['REDIS_URL'] = REDIS_CONNECTION_URL

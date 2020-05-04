@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from .app_fixtures import send_message, websocket_client, websocket_server
+from .app_fixtures import *
 
 WEBSOCKET_URI = "ws://localhost:8000"
 

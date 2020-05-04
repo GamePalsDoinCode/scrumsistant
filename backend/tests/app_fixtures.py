@@ -9,19 +9,24 @@ WEBSOCKET_URI = "ws://localhost:8000"
 
 
 @pytest.fixture
-def flask_client(event_loop):
-    test_config = {'TESTING': True}
+def redis(event_loop):
+    yield fakeredis.FakeRedis()
+
+
+@pytest.fixture
+def flask_client(event_loop, redis):
+    test_config = {'TESTING': True, 'redis': redis}
     app = create_flask_server(test_config=test_config)
     with app.test_client() as flask_client_obj:
         yield flask_client_obj
 
 
 @pytest.fixture
-async def websocket_server(event_loop):
-    server_ = Server(redis_client=fakeredis.FakeRedis())
+async def websocket_server(event_loop, redis):
+    server_ = Server(redis_client=redis)
     task = server_.get_server_task(server_.router)
     server = await task
-    yield
+    yield server_
     try:
         # sometimes this throws an exception, trying to close the thread twice
         # not 100000000% sure wtf that's about, but this seems ok
