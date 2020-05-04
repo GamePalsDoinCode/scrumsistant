@@ -13,11 +13,7 @@ WEBSOCKET_URI = "ws://localhost:8000"
 def flask_client(event_loop):
     test_config = {'TESTING': True}
     app = create_flask_server(test_config=test_config)
-    import_flask_routes()
     with app.test_client() as flask_client_obj:
-        import pdb
-
-        pdb.set_trace()
         yield flask_client_obj
 
 
