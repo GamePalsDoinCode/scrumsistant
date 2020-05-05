@@ -1,8 +1,14 @@
+env:
+  global:
+    - TEST=true
 language: python
 python: 
   - 3.8
 install:
   - pip install -r backend/requirements.txt
+before_script:
+  - touch backend/local_settings.py
+  - echo "FLASK_SECRET_KEY=b'red';REDIS_CONNECTION_URL=''" > backend/local_settings.py
 script:
   - pytest --cov=scrumsistant backend/tests
 after_success:
