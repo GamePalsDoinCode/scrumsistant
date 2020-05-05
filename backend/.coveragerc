@@ -3,9 +3,9 @@ branch = True
 omit =
 	local_settings.py
 	settings.py
-	../runserver.py
-	../scripts/*.py
-	tests/*
+	**/runserver.py
+	**/scripts/*.py
+	**/tests/*
 [report]
 fail_under = 70
 precision = 2
