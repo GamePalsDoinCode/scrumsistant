@@ -8,7 +8,7 @@ from typing import Dict, Iterable, List, cast
 import redis
 import websockets
 
-from .local_settings import REDIS_DB, REDIS_PORT, REDIS_URL, SERVER_NAME
+from .local_settings import REDIS_CONNECTION_URL, SERVER_NAME
 from .redis_schema import CurrentUsers, OwnsConnection, Users
 from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
 from .structs import WebsocketInfo
@@ -18,12 +18,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Server:
-    def __init__(self) -> None:
+    def __init__(self, redis_client: RedisClient = None) -> None:
         LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
-        self.redis: RedisClient = cast(RedisClient, redis.Redis(host=REDIS_URL, port=REDIS_PORT, db=REDIS_DB,))
-
+        self.redis: RedisClient
+        if redis_client:
+            self.redis = redis_client
+        else:
+            self.redis = cast(RedisClient, redis.Redis.from_url(REDIS_CONNECTION_URL))
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
@@ -41,6 +44,7 @@ class Server:
             task = loop.create_task(self.unregister(websocket))
             tasks.append(task)
         loop.run_until_complete(self._shutdown_helper(tasks))
+        self._redis_pubsub_thread.stop()
 
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
         next_pk = WebsocketInfo.get_new_pk(self.redis)
@@ -142,7 +146,6 @@ class Server:
         start_server = self.get_server_task(self.router)
         if loop is None:
             loop = asyncio.get_event_loop()
-
-        atexit.register(self.shutdown_handler)
+            atexit.register(self.shutdown_handler)
         loop.run_until_complete(start_server)
         loop.run_forever()
