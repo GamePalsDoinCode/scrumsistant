@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 
 from fakeredis import FakeRedis
@@ -46,4 +47,5 @@ def create_app(test_config=None):
     return app
 
 
-app = create_app()
+if not os.environ.get('TRAVIS'):  # true when run in CI
+    app = create_app()
