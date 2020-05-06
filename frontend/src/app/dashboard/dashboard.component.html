@@ -6,7 +6,7 @@
 <div>
   <div *ngIf="!nameLocked && user.pk">
     <label>Your Name:
-      <input [(ngModel)]="user.username" />
+      <input [(ngModel)]="user.displayName" />
     </label>
     <button (click)="lockName()">Go!</button>
   </div>
@@ -14,7 +14,7 @@
     <div *ngIf="nameLocked">
 
       <div>
-        Your Name: {{user.username}}
+        Your Name: {{user.displayName}}
       </div>
 
       <div>

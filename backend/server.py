@@ -11,7 +11,7 @@ import websockets
 from .local_settings import REDIS_CONNECTION_URL, SERVER_NAME
 from .redis_schema import CurrentUsers, OwnsConnection, Users
 from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
-from .structs import WebsocketInfo
+from .structs import UserInfo
 from .utils import cleanup_redis_dict
 
 LOGGER = logging.getLogger(__name__)
@@ -47,8 +47,10 @@ class Server:
         self._redis_pubsub_thread.stop()
 
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
-        next_pk = WebsocketInfo.get_new_pk(self.redis)
-        new_user_obj = WebsocketInfo(pk=next_pk, username="Uninitialized",)
+        # existing_user = self.redis.hgetall(Users())
+
+        next_pk = UserInfo.get_new_pk(self.redis)
+        new_user_obj = UserInfo(pk=next_pk, email='', display_name='')
         self.websocket_info_dict[websocket] = new_user_obj.pk
         print("registered", self.websocket_info_dict)
         self.redis.set(
@@ -74,7 +76,7 @@ class Server:
             message = {
                 "type": "userLeft",
                 "pk": dropped_user_pk,
-                "name": user_dict["username"],
+                "displayName": user_dict["displayName"],
             }
             await self.broadcast(json.dumps(message))
 

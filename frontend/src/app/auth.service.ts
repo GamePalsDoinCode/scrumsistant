@@ -9,6 +9,7 @@ import { Router, CanActivate, ActivatedRouteSnapshot } from '@angular/router';
 export class AuthService implements CanActivate {
 
   errorMessage = ''
+  user: Scrum.User = {email: '', pk: null, displayName: ''}
 
   constructor(
     private http: HttpClient,
@@ -20,14 +21,20 @@ export class AuthService implements CanActivate {
     return this.http.get('api/is_authenticated')
   }
 
+  getUserInfo() {
+    return this.user
+  }
+
   checkCredentials(user: {email: string, password: string}, redirectTo: string | null = null){
     this.errorMessage = ''
     this.http.post('/api/login', {...user}).subscribe(
       success => {
+        this.user.email = user.email
         this.router.navigate([redirectTo || '/app/dashboard'])
       },
       error => {
         this.errorMessage = "Invalid Credentials!  We've got a saboteur!"
+        this.user = {email: '', pk: null, displayName: ''}
        }
       )
     return false

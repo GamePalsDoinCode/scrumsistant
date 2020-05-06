@@ -14,9 +14,9 @@ from .utils import transform_to_redis_safe_dict
 
 
 class AnonymousUserWrapper(AnonymousUserMixin):
-    # current user will either be this or a WebSocketInfo
+    # current user will either be this or a UserInfo
     # the flask builtin has is_authenticated as a property
-    # but WebSocketInfo needs it to be a method.
+    # but UserInfo needs it to be a method.
     # To maintain ducktyping, we need this shell of a class
     # to expose a method for is_authenticated
     # it always returns False by definition (because this is a representation of a user prior to logging in)
@@ -25,9 +25,10 @@ class AnonymousUserWrapper(AnonymousUserMixin):
 
 
 @dataclass
-class WebsocketInfo:
+class UserInfo:
     pk: int
-    username: str = "Uninitialized"  # TODO this should either be email, or we should have email separate and this should be display name
+    display_name: str = ''
+    email: str = ''
     password: Optional[str] = None
 
     def serialize(
@@ -51,8 +52,11 @@ class WebsocketInfo:
         def _pk_transformer(pk_byte_string: bytes) -> int:
             return _int_transformer(pk_byte_string)
 
-        def _username_transformer(name_byte_string: bytes) -> str:
+        def _email_transformer(name_byte_string: bytes) -> str:
             return _string_transformer(name_byte_string)
+
+        def _display_name_transformer(display_name_byte_string: bytes) -> str:
+            return _string_transformer(display_name_byte_string)
 
         def _password_transformer(password_byte_string: bytes) -> Union[None, str]:
             password_or_null = _string_transformer(password_byte_string)
@@ -63,14 +67,14 @@ class WebsocketInfo:
         return locals()[f"_{field_name}_transformer"]
 
     @staticmethod
-    def deserialize(serialized_obj: Mapping[bytes, bytes], from_redis: bool = True) -> 'WebsocketInfo':
-        new_obj = WebsocketInfo(pk=-1,)
+    def deserialize(serialized_obj: Mapping[bytes, bytes], from_redis: bool = True) -> 'UserInfo':
+        new_obj = UserInfo(pk=-1,)
 
         if from_redis:
             ser = {}
             for k, v in serialized_obj.items():
                 key_str = k.decode("utf8")
-                ser[key_str] = WebsocketInfo.redis_transformers(key_str)(v)
+                ser[key_str] = UserInfo.redis_transformers(key_str)(v)
 
         return dataclass_replace(new_obj, **ser)
 
@@ -83,7 +87,7 @@ class WebsocketInfo:
         return True
 
     def is_anonymous(self) -> bool:
-        return self.username == "Uninitialized"
+        return self.email == ''
 
     def get_id(self) -> str:
         return Users(self.pk)
@@ -100,13 +104,18 @@ class WebsocketInfo:
 
     def save_new_user(self, redis_client: RedisClient) -> None:
         self._check_not_overwriting(redis_client)
-        redis_client.set(PKByEmail(self.username), self.pk)
-        redis_client.hmset(Users(self.pk), self.serialize(skip_list=["_is_authenticated"]))
+        redis_client.set(PKByEmail(self.email), self.pk)
+        redis_client.hmset(Users(self.pk), self.serialize())
+
+    def update_user(self, redis_client: RedisClient) -> 'UserInfo':
+        self._check_not_overwriting(redis_client)
+        redis_client.hmset(Users(self.pk), self.serialize())
+        updated_model_dict = redis_client.hgetall(Users(self.pk))
+        updated_model = UserInfo.deserialize(updated_model_dict)
+        return updated_model
 
     def _check_not_overwriting(self, redis_client: RedisClient) -> None:
-        pk_associated_with_my_username_dirty = redis_client.get(
-            PKByEmail(self.username)
-        )  # by dirty I mean, its bytes atm
+        pk_associated_with_my_username_dirty = redis_client.get(PKByEmail(self.email))  # by dirty I mean, its bytes atm
         if not pk_associated_with_my_username_dirty:
             return
         pk = int(pk_associated_with_my_username_dirty)

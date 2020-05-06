@@ -30,6 +30,6 @@ export class DashboardService {
   }
 
   userJoined(user: Scrum.User){
-    return this.http.post(BASE_URL, {username: user.username, pk: user.pk})
+    return this.http.post(BASE_URL, {displayName: user.displayName, pk: user.pk})
   }
 }
