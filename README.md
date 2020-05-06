@@ -25,6 +25,8 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
     * Run `npm ci` to install any libraries we need. You will need to do this again whenever new dependencies are added. [Here's why](https://stackoverflow.com/a/53325242) we use this instead of `npm install`.
 * **TSLint**
     * Run `npm install tslint typescript -g` to install tslint
+* **Prettier**
+    * Run `npm install -g prettier` to install prettier ([js/ts/scss/html code formatter](https://prettier.io/))
 ### Backend
 * **Python Virtual Environment**
     * **Danny:** 
