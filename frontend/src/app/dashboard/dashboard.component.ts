@@ -59,7 +59,6 @@ export class DashboardComponent implements OnInit {
       if (msg.name !== this.user.displayName) {
         this.broadcastMsg = `Say hello to ${msg.name}!`
         console.log(this.broadcastMsg)
-
         this.usernames.push(msg.name)
       }
     } else if (msg.type === 'confirmJoined') {
