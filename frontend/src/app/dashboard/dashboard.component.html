@@ -1,28 +1,22 @@
 <app-nav></app-nav>
 
-
-
-
 <div>
   <div *ngIf="!nameLocked && user.pk">
-    <label>Your Name:
+    <label
+      >Your Name:
       <input [(ngModel)]="user.displayName" />
     </label>
     <button (click)="lockName()">Go!</button>
   </div>
 
-    <div *ngIf="nameLocked">
+  <div *ngIf="nameLocked">
+    <div>Your Name: {{ user.displayName }}</div>
 
-      <div>
-        Your Name: {{user.displayName}}
+    <div>
+      Current Users:
+      <div *ngFor="let name of usernames">
+        {{ name }}
       </div>
-
-      <div>
-        Current Users:
-        <div *ngFor="let name of usernames">
-          {{name}}
-        </div>
-      </div>
-
     </div>
+  </div>
 </div>

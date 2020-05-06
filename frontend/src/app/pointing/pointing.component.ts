@@ -1,29 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core'
 import {ClockService} from '../clock.service'
 
 @Component({
   selector: 'app-pointing',
   templateUrl: './pointing.component.html',
-  styleUrls: ['./pointing.component.scss']
+  styleUrls: ['./pointing.component.scss'],
 })
 export class PointingComponent implements OnInit {
-
   // TODO: points should be configurable I guess?
-  points: number[] = [
-  1,
-  2,
-  3,
-  5,
-  8,
-  13,
-  20,
-]
+  points: number[] = [1, 2, 3, 5, 8, 13, 20]
 
-  votingStates = [
-    'preVoting',
-    'periVoting',
-    'postVoting',
-  ]
+  votingStates = ['preVoting', 'periVoting', 'postVoting']
   votingStateIndex = 0
 
   allowedVotingTimeSeconds = 3
@@ -33,25 +20,19 @@ export class PointingComponent implements OnInit {
   outlier: number | undefined = undefined
   average: number | undefined = undefined
 
-
   constructor(private clockService: ClockService) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
-  selectPoint(pointValue: number){
+  selectPoint(pointValue: number) {
     this.votes.push(pointValue)
     this.checkIfDone()
   }
 
-  checkIfDone(){
-    if (
-      this.votes.length === this.numVoters &&
-      this.votingStateIndex === 1
-     ){
+  checkIfDone() {
+    if (this.votes.length === this.numVoters && this.votingStateIndex === 1) {
       this.votingStateIndex = 2
     }
-
 
     // TEMP WIHLE THERES NOT OTHER FRIENDS
     this.votes.push(Math.floor(Math.random() * 20 + 1))
@@ -59,7 +40,7 @@ export class PointingComponent implements OnInit {
     this.voteOutliers()
   }
 
-  beginVote(){
+  beginVote() {
     if (this.votingStates[this.votingStateIndex] !== 'preVoting') {
       return
     }
@@ -67,8 +48,8 @@ export class PointingComponent implements OnInit {
     this.clockService.getTimer(
       this.allowedVotingTimeSeconds,
       1000,
-      () => this.allowedVotingTimeSeconds = this.allowedVotingTimeSeconds - 1,
-      () => this.votingStateIndex = 2,
+      () => (this.allowedVotingTimeSeconds = this.allowedVotingTimeSeconds - 1),
+      () => (this.votingStateIndex = 2)
     )
 
     // let timer$ = timer((this.allowedVotingTimeSeconds + 1) * 1000)
@@ -84,20 +65,19 @@ export class PointingComponent implements OnInit {
     // )
   }
 
-  voteAverage(){
-    let average = this.votes.reduce((acc, vote) => acc + vote, 0) / this.votes.length
+  voteAverage() {
+    let average =
+      this.votes.reduce((acc, vote) => acc + vote, 0) / this.votes.length
     let diffs = this.points.map(point => Math.abs(point - average))
     let lowest = Math.min(...diffs)
     let lowestIdx = diffs.findIndex(diff => diff == lowest)
     this.average = this.points[lowestIdx]
   }
 
-  voteOutliers(){
+  voteOutliers() {
     // TEMP
     let names = ['Alfonso', 'Alice', 'Amelia']
     let outlier = this.votes.find(vote => Math.abs(this.average - vote) > 1)
     this.outlier = outlier
   }
-
-
 }
