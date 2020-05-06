@@ -15,6 +15,9 @@ export class AuthService implements CanActivate {
     // TODO: is this a bad idea to hit the backend on any route change?
     return this.http.get('api/is_authenticated')
   }
+  requestWebsocketAuthToken() {
+    return this.http.get('api/get_websocket_auth_token')
+  }
 
   getUserInfo() {
     return this.user
