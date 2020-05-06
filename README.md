@@ -82,7 +82,7 @@ We are using tslint to lint our code. Install it as per the [instructions above]
 We are formatting our backend code according to the standards imposed by the fascist maintaining [`black`](https://github.com/psf/black). We are also using the [`isort`](https://github.com/timothycrosley/isort) library. You can easily set up your IDE to auto-run these tools whenever you save, which I suggest (and can help with).
 
 ## Enforced formatting via pre-commit hooks
-We are also using a cool python library called [`pre-commit`](https://github.com/timothycrosley/isort) that will generate the file `.git/hooks/pre-commit` in your project to automatically do this formatting for you whenever you commit code. 
+We are also using a cool python library called [`pre-commit`](https://pre-commit.com/) that will generate the file `.git/hooks/pre-commit` in your project to automatically do this formatting for you whenever you commit code. 
 
 Please set this up prior to contributing on the backend by installing `pre-commit` (it's in the `requirements.txt` so should happen when running `pip install -r requirements.txt`) and then running `pre-commit install`, which will actually make the hook file (based on the rules we set up for it in `.pre-commit-config.yaml`). 
 
