@@ -19,10 +19,7 @@ export class DashboardComponent implements OnInit {
   broadcastMsg = ''
   usernames: string[] = []
 
-  constructor(
-    private dashboardService: DashboardService,
-    private cookieService: CookieService
-  ) {}
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.socket = webSocket('ws://localhost:8000')
