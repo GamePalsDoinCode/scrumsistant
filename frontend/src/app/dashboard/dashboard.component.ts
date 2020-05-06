@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { delay } from 'rxjs/operators';
 import { DashboardService } from '../dashboard.service';
+import { CookieService } from 'ngx-cookie-service';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -18,7 +19,10 @@ export class DashboardComponent implements OnInit {
   broadcastMsg = '';
   usernames: string[] = [];
 
-  constructor(private dashboardService: DashboardService) { }
+  constructor(
+    private dashboardService: DashboardService,
+    private cookieService: CookieService
+  ) {}
 
   ngOnInit(): void {
     this.socket = webSocket('ws://localhost:8000');
