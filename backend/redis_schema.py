@@ -25,3 +25,7 @@ def CurrentUsers() -> RedisKey:
 
 def CurrentPKTable() -> RedisKey:
     return _table_base('WEBSOCKET_PK', '')
+
+
+def AuthToken(token: bytes) -> RedisKey:
+    return _table_base('AuthToken:{}', token)

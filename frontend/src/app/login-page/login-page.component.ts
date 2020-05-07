@@ -14,9 +14,7 @@ export class LoginPageComponent implements OnInit {
 
   constructor(private authService: AuthService) {}
 
-  ngOnInit(): void {
-    this.authService.checkSessionCookie()
-  }
+  ngOnInit(): void {}
 
   submitLogin() {
     console.log(this.potentialUser)

@@ -14,20 +14,6 @@ export class DashboardService {
     return this.http.get<string[]>(BASE_URL)
   }
 
-  userConnected(
-    socketListenerFunc: (_: any) => void,
-    socketErrorFunc: (_: any) => void,
-    socketClosedFunc: () => void
-  ) {
-    let socket = webSocket('ws://localhost:8000')
-    socket.subscribe(
-      serverMsg => socketListenerFunc(serverMsg),
-      err => socketErrorFunc(err),
-      () => socketClosedFunc()
-    )
-    return socket
-  }
-
   userJoined(user: Scrum.User) {
     return this.http.post(BASE_URL, {
       displayName: user.displayName,

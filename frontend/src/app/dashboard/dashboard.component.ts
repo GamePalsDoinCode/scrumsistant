@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core'
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket'
 import {delay} from 'rxjs/operators'
 import {DashboardService} from '../dashboard.service'
-import {CookieService} from 'ngx-cookie-service'
+import {AuthService} from '../auth.service'
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -19,23 +19,33 @@ export class DashboardComponent implements OnInit {
   broadcastMsg = ''
   usernames: string[] = []
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.socket = webSocket('ws://localhost:8000')
-    this.socket.subscribe(
-      serverMsg => this.handleIncoming(serverMsg),
-      err => console.log(err),
-      () => console.log('hey there! conn closed')
-    )
-    this.dashboardService.getCurrentUserNames().subscribe(usernames => {
-      console.log(usernames)
-      console.log(usernames.filter(name => name !== 'Uninitialized'))
-      this.usernames = this.usernames.concat(
-        usernames.filter(name => name !== 'Uninitialized')
+    this.authService.requestWebsocketAuthToken().subscribe(authObj => {
+      this.socket = webSocket('ws://localhost:8000')
+      this.socket.subscribe(
+        serverMsg => this.handleIncoming(serverMsg),
+        err => console.log(err),
+        () => console.log('hey there! conn closed')
       )
-      console.log(this.usernames)
+      const message = {
+        msg: 'authTokenVerification',
+        data: authObj,
+      }
+      this.socket.next(message)
     })
+    // this.dashboardService.getCurrentUserNames().subscribe(usernames => {
+    //   console.log(usernames)
+    //   console.log(usernames.filter(name => name !== 'Uninitialized'))
+    //   this.usernames = this.usernames.concat(
+    //     usernames.filter(name => name !== 'Uninitialized')
+    //   )
+    //   console.log(this.usernames)
+    // })
   }
 
   lockName(): void {

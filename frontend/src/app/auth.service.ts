@@ -41,11 +41,6 @@ export class AuthService implements CanActivate {
     return false
   }
 
-  checkSessionCookie() {
-    console.log('checking if already logged in')
-    return false
-  }
-
   logout() {
     this.http.get('/api/logout').subscribe(
       () => this.router.navigate(['/login']),

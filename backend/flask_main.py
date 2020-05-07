@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
 
-from fakeredis import FakeRedis
 from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
@@ -31,7 +30,7 @@ def create_app(test_config=None):
         app.config['REDIS_URL'] = REDIS_CONNECTION_URL
         redis_client: RedisClient = FlaskRedis(app)
 
-    app.redis_client = redis_client
+    app.redis_client: RedisClient = redis_client
     login_service = LoginManager(app)
     app.login_service = login_service
     login_service.anonymous_user = AnonymousUserWrapper

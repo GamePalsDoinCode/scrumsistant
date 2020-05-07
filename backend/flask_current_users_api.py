@@ -24,7 +24,7 @@ def current_users() -> FLASK_RESPONSE_TYPE:
     elif request.method == 'POST':
         user = current_user
         post_data = request.get_json()
-        display_name = post_data['display_name']
+        display_name = post_data['displayName']
         user.display_name = display_name
         user = user.update_user(current_app.redis_client)
 
