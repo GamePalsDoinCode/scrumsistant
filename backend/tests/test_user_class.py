@@ -37,7 +37,7 @@ def test_is_anonymous(email):
     assert u.is_anonymous() == (email == '')
 
 
-@given(one_of(none(), text(min_size=1)), text())
+@given(one_of(none(), text(min_size=1)), text(min_size=1))
 @settings(max_examples=10)  # password hashing is expensive
 def test_password_checking_works(password, wrong_password):
     assume(password != wrong_password)

@@ -101,7 +101,7 @@ class UserInfo:
             self.password = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
-        if not self.password:
+        if self.password is None:
             return False
         return check_password_hash(self.password, password)
 
