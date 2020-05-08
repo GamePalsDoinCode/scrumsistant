@@ -23,11 +23,11 @@ def test_redis_round_trip(redis, test_dict):
     # so this is not a full test of the transform function
 
     redis_safe_dict = transform_to_redis_safe_dict(test_dict)
-    redis.hmset('key', redis_safe_dict)
-    redised_dict = redis.hgetall('key')
-    normal_dict = cleanup_redis_dict(redised_dict)
-    assert normal_dict == test_dict
-    redis.delete('key')  # this is because fixtures are not reset between hypothesis runs
+    with hypothesis_safe_redis(redis) as redis:
+        redis.hmset('key', redis_safe_dict)
+        redised_dict = redis.hgetall('key')
+        normal_dict = cleanup_redis_dict(redised_dict)
+        assert normal_dict == test_dict
 
 
 def test__load_user_loads_correct_user(redis, user):

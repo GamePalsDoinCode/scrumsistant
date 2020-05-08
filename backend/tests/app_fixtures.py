@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import fakeredis
 import pytest
 import websockets
@@ -6,6 +8,12 @@ from ..flask_main import create_app as create_flask_server
 from ..server import Server
 
 WEBSOCKET_URI = "ws://localhost:8000"
+
+
+@contextmanager
+def hypothesis_safe_redis(redis):
+    yield redis
+    redis.flushall()
 
 
 @pytest.fixture
