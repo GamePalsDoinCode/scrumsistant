@@ -12,3 +12,4 @@ backend/local_settings.py
 *.log.*
 .mypy_cache
 **/.coverage
+**/.hypothesis

@@ -82,7 +82,7 @@ class UserInfo:
     def is_authenticated(self, session: Mapping[str, Dict[str, Any]]) -> bool:
         return session.get("_user_id") == Users(self.pk)
 
-    def is_active(self,) -> Literal[True]:  # pylint: disable=no-self-use
+    def is_active(self) -> Literal[True]:  # pylint: disable=no-self-use # pragma: no cover
         # This method is required by the flask-login library, but we don't really have this concept
         return True
 

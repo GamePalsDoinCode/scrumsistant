@@ -1,15 +1,20 @@
 import asyncio
 import atexit
+import codecs
 import json
 import logging
 from asyncio import Task
 from typing import Dict, Iterable, List, cast
 
+import nacl.encoding  # type: ignore
+import nacl.signing  # type: ignore
 import redis
 import websockets
 
+from .exceptions import RedisKeyNotFoundError
+from .flask_utils import _load_user
 from .local_settings import REDIS_CONNECTION_URL, SERVER_NAME
-from .redis_schema import CurrentUsers, OwnsConnection, Users
+from .redis_schema import AuthToken, CurrentUsers, OwnsConnection, Users
 from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
 from .structs import UserInfo
 from .utils import cleanup_redis_dict
@@ -46,23 +51,19 @@ class Server:
         loop.run_until_complete(self._shutdown_helper(tasks))
         self._redis_pubsub_thread.stop()
 
-    async def register(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
+    async def register(self, websocket: WEBSOCKET_TEMP_TYPE, user: UserInfo) -> None:
         # existing_user = self.redis.hgetall(Users())
 
-        next_pk = UserInfo.get_new_pk(self.redis)
-        new_user_obj = UserInfo(pk=next_pk, email='', display_name='')
-        self.websocket_info_dict[websocket] = new_user_obj.pk
+        self.websocket_info_dict[websocket] = user.pk
         print("registered", self.websocket_info_dict)
         self.redis.set(
-            OwnsConnection(new_user_obj.pk), self.SERVER_NAME,
+            OwnsConnection(user.pk), self.SERVER_NAME,
         )
-        self.redis.hmset(Users(new_user_obj.pk), new_user_obj.serialize())
-        self.redis.sadd(CurrentUsers(), new_user_obj.pk)
+        self.redis.sadd(CurrentUsers(), user.pk)
         socket_message = {
             "type": "confirmJoined",
-            "pk": new_user_obj.pk,
+            "pk": user.pk,
         }
-        print("new pk registered", next_pk)
         await websocket.send(json.dumps(socket_message))
 
     async def unregister(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
@@ -70,13 +71,11 @@ class Server:
         print(dropped_user_pk, "socket deregistered")
         if dropped_user_pk:
             self.redis.delete(OwnsConnection(dropped_user_pk))
-            user_dict = cleanup_redis_dict(self.redis.hgetall(Users(dropped_user_pk)))
-            self.redis.delete(Users(dropped_user_pk))
             self.redis.srem(CurrentUsers(), str(dropped_user_pk))
             message = {
                 "type": "userLeft",
                 "pk": dropped_user_pk,
-                "displayName": user_dict["displayName"],
+                # "displayName": user_dict["display_name"],
             }
             await self.broadcast(json.dumps(message))
 
@@ -126,9 +125,28 @@ class Server:
                 task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
                 loop.run_until_complete(task)
 
+    def verify_websocket_auth(self, auth_info: Dict[str, str]) -> UserInfo:
+        signed_token = codecs.decode(auth_info['signedToken'], 'hex')
+        verify_key = nacl.signing.VerifyKey(auth_info['verifyKey'].encode('utf8'), encoder=nacl.encoding.HexEncoder)
+        token = verify_key.verify(signed_token)
+        user_pk = self.redis.get(AuthToken(token))
+        if not user_pk:
+            raise RedisKeyNotFoundError
+        user = _load_user(Users(user_pk), self.redis)
+        if not user:
+            raise RedisKeyNotFoundError
+        self.redis.delete(AuthToken(token))
+        return user
+
     async def router(self, websocket: WEBSOCKET_TEMP_TYPE, path: str) -> None:  # pylint: disable=unused-argument
         if websocket not in self.websocket_info_dict:
-            await self.register(websocket)
+            init_message = json.loads(await websocket.recv())  # can throw error, will just hit the unregister
+            print(init_message)
+            if init_message.get('msg') == 'authTokenVerification':
+                user = self.verify_websocket_auth(init_message['data'])  # can throw error
+                await self.register(websocket, user)
+            else:
+                await websocket.close()
         try:
             async for message in websocket:
                 data = json.loads(message)

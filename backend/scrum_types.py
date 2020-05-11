@@ -26,6 +26,10 @@ class RedisClient:
     def set(self, key: RedisKey, val: REDIS_SAFE_INPUT) -> None:
         ...
 
+    def setex(self, key: RedisKey, expire_time: int, val: REDIS_SAFE_INPUT) -> None:
+        # expire time is in seconds
+        ...
+
     def delete(self, key: RedisKey) -> None:
         ...
 
