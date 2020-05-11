@@ -1,11 +1,13 @@
 [run]
 branch = True
 omit =
-	local_settings.py
-	settings.py
+	**/local_settings.py
+	**/settings.py
 	**/runserver.py
 	**/scripts/*.py
 	**/tests/*
+	**/scrum_types.py
+	**/handler_funcs.py
 [report]
 fail_under = 70
 precision = 2

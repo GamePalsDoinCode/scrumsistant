@@ -3,8 +3,9 @@ from typing import Optional
 from flask import abort, current_app, request, session
 from flask_login import current_user
 
-from .scrum_types import RedisKey
-from .structs import WebsocketInfo
+from .exceptions import RedisKeyNotFoundError
+from .scrum_types import RedisClient, RedisKey
+from .structs import UserInfo
 
 
 def login_required_by_default() -> None:
@@ -14,9 +15,16 @@ def login_required_by_default() -> None:
     abort(401)
 
 
-def load_user(table_key: RedisKey) -> Optional[WebsocketInfo]:
-    user_dict = current_app.redis_client.hgetall(table_key)
+def _load_user(table_key: RedisKey, redis_client: RedisClient):
+    user_dict = redis_client.hgetall(table_key)
     if user_dict:
-        user = WebsocketInfo.deserialize(user_dict)
+        user = UserInfo.deserialize(user_dict)
         return user
-    return None
+    raise RedisKeyNotFoundError
+
+
+def load_user(table_key: RedisKey) -> Optional[UserInfo]:
+    try:
+        return _load_user(table_key, current_app.redis_client)
+    except RedisKeyNotFoundError:
+        return None

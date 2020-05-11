@@ -1,7 +1,7 @@
 declare namespace Scrum {
-  export interface User {
-    username: string,
+  interface User {
+    displayName: string,  // TODO: change this to displayName
     pk: null | number,
+    email: string,
   }
-
 }

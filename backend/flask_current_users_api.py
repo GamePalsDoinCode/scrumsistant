@@ -19,30 +19,27 @@ def current_users() -> FLASK_RESPONSE_TYPE:
         for table_key in current_pks:
             pipe.hgetall(table_key)
         current_user_dicts = [cleanup_redis_dict(user) for user in pipe.execute() if user]
-        current_usernames = [user['username'] for user in current_user_dicts]
+        current_usernames = [user['display_name'] for user in current_user_dicts]
         return json.dumps(current_usernames)
     elif request.method == 'POST':
         user = current_user
-        user_pk = user.pk
         post_data = request.get_json()
-        user_name = post_data['username']
-        # TODO - run this through the user.save method n stuff
-        current_app.redis_client.hset(Users(user_pk), 'username', user_name)
-        user_dict = {
-            k.decode('utf8'): v.decode('utf8') for k, v in current_app.redis_client.hgetall(Users(user_pk)).items()
-        }
+        display_name = post_data['displayName']
+        user.display_name = display_name
+        user = user.update_user(current_app.redis_client)
+
         message_for_browser = {
             'type': 'userJoined',
-            'name': user_dict['username'],
-            'pk': int(user_dict['pk']),
+            'displayName': user.display_name,
+            'pk': user.pk,
         }
         ipc_message = {
             'messageType': 'userUpdated',
-            'pk': int(user_dict['pk']),
+            'pk': user.pk,
             'broadcastTo': 'all',
             'message': json.dumps(message_for_browser),
         }
         current_app.redis_client.publish('flask-IPC', json.dumps(ipc_message))
-        return user_dict
+        return user.serialize(serialize_method=json.dumps)
     else:
         return '', HTTP_STATUS_CODE.HTTP_404_NOT_FOUND.value

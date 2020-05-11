@@ -13,7 +13,7 @@ def test_login_fail_with_no_user_in_db(flask_client, websocket_server):
 def test_login_fail_with_wrong_password(flask_client, user):
     new_user = user()
     post_data = {
-        'email': new_user.username,
+        'email': new_user.email,
         'password': new_user.password,  # the password here is the already hashed password, so that is all but guaranteed to fail (I guess nothing prevents the hash not changing it but probs)
     }
     rv = flask_client.post('login', json=post_data)
@@ -25,7 +25,7 @@ def test_login_success_with_right_password(flask_client, user):
     new_user = user(password=password)
 
     post_data = {
-        'email': new_user.username,
+        'email': new_user.email,
         'password': password,
     }
     rv = flask_client.post('login', json=post_data)

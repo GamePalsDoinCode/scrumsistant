@@ -22,6 +22,14 @@ def flask_client(event_loop, redis):
 
 
 @pytest.fixture
+def flask_app(event_loop, redis):
+    test_config = {'TESTING': True, 'redis': redis}
+    app = create_flask_server(test_config=test_config)
+    with app.app_context() as app_:
+        yield
+
+
+@pytest.fixture
 async def websocket_server(event_loop, redis):
     server_ = Server(redis_client=redis)
     task = server_.get_server_task(server_.router)
