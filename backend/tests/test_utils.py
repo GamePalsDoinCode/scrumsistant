@@ -32,7 +32,6 @@ def test_redis_round_trip(redis, test_dict):
         normal_dict = cleanup_redis_dict(redised_dict)
         assert normal_dict == test_dict
 
-
 def test__load_user_loads_correct_user(redis, user):
     # objects compare on identity so would fail
     # so we will compare serialized versions

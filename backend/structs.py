@@ -77,7 +77,6 @@ class UserInfo:
                 ser[key_str] = UserInfo.redis_transformers(key_str)(v)
         else:
             ser = serialized_obj
-
         return dataclass_replace(new_obj, **ser)
 
     # methods required by flask-login

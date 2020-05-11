@@ -159,7 +159,6 @@ class Server:
                     #     await handle_get_usernames(websocket)
             finally:
                 await self.unregister(websocket)
-
     def get_server_task(self, func, route="localhost", port=8000):  # pylint: disable=no-self-use
         start_server = websockets.serve(func, route, port)
         return start_server
