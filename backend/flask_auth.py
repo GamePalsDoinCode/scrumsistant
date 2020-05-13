@@ -1,3 +1,4 @@
+import json
 import os
 
 import nacl.encoding  # type: ignore
@@ -34,7 +35,7 @@ def login() -> FLASK_RESPONSE_TYPE:
     if password_ok:
         login_user(user)
         session.permanent = True
-        return {'auth': 'ok'}
+        return {'auth': 'ok', 'user': user.serialize(serialize_method=json.dumps)}
     return not_allowed_return_val
 
 
