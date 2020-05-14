@@ -11,7 +11,7 @@ from .app_fixtures import *
 from .user_fixtures import *
 
 
-@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=one_of(text(min_size=1), none()))
+@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=text(min_size=1))
 @settings(max_examples=10)  # something about this takes forever!
 @pytest.mark.filterwarnings(
     'ignore:.*'
@@ -25,7 +25,7 @@ def test_serialize_deserialize_roundtrip_through_redis(redis, pk, display_name, 
         assert user == round_tripped_user
 
 
-@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=one_of(text(min_size=1), none()))
+@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=text(min_size=1))
 @settings(max_examples=10)  # something about this takes forever!
 def test_deserialize_not_from_redis(pk, display_name, email, password):
     u = UserInfo(pk=pk, display_name=display_name, email=email)
@@ -41,17 +41,14 @@ def test_is_anonymous(email):
     assert u.is_anonymous() == (email == '')
 
 
-@given(one_of(none(), text(min_size=1)), text(min_size=1))
+@given(text(min_size=1), text(min_size=1))
 def test_password_checking_works(password, wrong_password):
     assume(password != wrong_password)
     u = UserInfo(pk=1)
 
     u.set_password(password)
     assert not u.check_password(wrong_password)
-    if password is None:
-        assert not u.check_password(password)
-    else:
-        assert u.check_password(password)
+    assert u.check_password(password)
 
 
 if os.environ.get('TRAVIS'):

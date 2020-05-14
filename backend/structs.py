@@ -95,9 +95,8 @@ class UserInfo:
 
     # end login required methods
 
-    def set_password(self, password: Optional[str]) -> None:
-        if password:
-            self.password = generate_password_hash(password)
+    def set_password(self, password: str) -> None:
+        self.password = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
         if self.password is None:
