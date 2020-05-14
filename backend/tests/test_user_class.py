@@ -11,14 +11,15 @@ from .app_fixtures import *
 from .user_fixtures import *
 
 
-@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=text(min_size=1))
+@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=one_of(none(), text(min_size=1)))
 @settings(max_examples=10)  # something about this takes forever!
 @pytest.mark.filterwarnings(
     'ignore:.*'
 )  # this test warns that the fixture is not reset each test run and recommends using a context manager, which we do. so i want to disable just that warning, but the regex filtering any more specific than that isnt working TODO
 def test_serialize_deserialize_roundtrip_through_redis(redis, pk, display_name, email, password):
     user = UserInfo(pk=pk, display_name=display_name, email=email)
-    user.set_password(password)
+    if password:
+        user.set_password(password)
     with hypothesis_safe_redis(redis) as redis:
         redis.hmset('key', user.serialize())
         round_tripped_user = UserInfo.deserialize(redis.hgetall('key'))
@@ -41,14 +42,17 @@ def test_is_anonymous(email):
     assert u.is_anonymous() == (email == '')
 
 
-@given(text(min_size=1), text(min_size=1))
+@given(one_of(none(), text(min_size=1)), text(min_size=1))
 def test_password_checking_works(password, wrong_password):
     assume(password != wrong_password)
     u = UserInfo(pk=1)
-
-    u.set_password(password)
+    if password:
+        u.set_password(password)
     assert not u.check_password(wrong_password)
-    assert u.check_password(password)
+    if password:
+        assert u.check_password(password)
+    else:
+        assert not u.check_password(password)
 
 
 if os.environ.get('TRAVIS'):
