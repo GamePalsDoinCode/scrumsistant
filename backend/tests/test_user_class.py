@@ -55,7 +55,9 @@ if os.environ.get('TRAVIS'):
     # test password hashing times out in CI, little too long
     # so just cut it short for now
     # TODO investigate using a CI profile instead of this manual call
-    reduced_max = settings(max_examples=1)
+    reduced_max = settings(
+        max_examples=1, deadline=500
+    )  # deadline is in milliseconds.  In CI it takes about 325 ms, the default deadline is 200
 else:
     reduced_max = settings(max_examples=10)
 test_password_checking_works = reduced_max(test_password_checking_works)
