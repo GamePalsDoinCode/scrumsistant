@@ -26,6 +26,27 @@ def test_serialize_deserialize_roundtrip_through_redis(redis, pk, display_name, 
         assert user == round_tripped_user
 
 
+def test_serialize_skip_list_works_with_valid_key(user):
+    u = user()
+    serialized_user = u.serialize(serialize_method=dict)
+    serialized_user_skip = u.serialize(skip_list=['pk'], serialize_method=dict)
+    assert 'pk' in serialized_user and 'pk' not in serialized_user_skip
+
+
+def test_serialize_skip_list_ignores_invalid_key(user):
+    u = user()
+    serialized_user = u.serialize(serialize_method=dict)
+    serialized_user_bad_key = u.serialize(serialize_method=dict, skip_list=['blarg'])
+    assert serialized_user == serialized_user_bad_key
+
+
+def test__check_not_overwriting_happy_path(user, redis):
+    u = user()
+    u.display_name = 'another name!'
+    u.update_user(redis)
+    assert True  # above will throw an exception if the test fails
+
+
 @given(pk=integers(), display_name=text(min_size=1), email=emails(), password=text(min_size=1))
 @settings(max_examples=10)  # something about this takes forever!
 def test_deserialize_not_from_redis(pk, display_name, email, password):
