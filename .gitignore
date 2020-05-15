@@ -13,3 +13,4 @@ backend/local_settings.py
 .mypy_cache
 **/.coverage
 **/.hypothesis
+**/htmlcov
