@@ -46,5 +46,5 @@ def create_app(test_config=None):
     return app
 
 
-if not os.environ.get('TRAVIS'):  # true when run in CI
+if not os.environ.get('TRAVIS'):  # true when run in CI # pragma: no cover
     app = create_app()
