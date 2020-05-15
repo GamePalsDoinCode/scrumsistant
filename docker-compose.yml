@@ -2,33 +2,56 @@ version: "3.7"
 
 services:
   redis:
-    image: redis
+    image: redis:alpine
     ports:
       - "6379:6379"
+    volumes:
+      - ./scrumsistant/docker/redis.config:/usr/local/etc/redis/redis.conf
+    logging:
+      driver: "none"
 
   flask:
-    build:
-      context: .
-      dockerfile: Dockerfile_Flask
-    command: bash -c "flask run"
+    build: .
+    image: flask
+    command: bash -c "cd backend && flask run --host 0.0.0.0"
     ports:
       - "5000:5000"
+    volumes:
+      - ./backend:/scrumsistant/backend
+      - ./scripts:/scrumsistant/scripts
     depends_on:
       - redis
+    links:
+      - redis
+    environment:
+      REDIS_URL: redis
   websocket:
-    build:
-      context: .
-      dockerfile: Dockerfile_Websocket
+    build: .
+    image: websocket
     command: bash -c "python runserver.py"
     depends_on:
       - redis
+    links:
+      - redis
+    volumes:
+      - ./backend:/scrumsistant/backend
+      - ./scripts:/scrumsistant/scripts
+      - ./docker/runserver.py:/scrumsistant/runserver.py
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis
   angular:
-    build:
-      context: .
-      dockerfile: Dockerfile_Angular
-    command: bash -c "node_modules/bin/ng serve"
+    build: .
+    image: angular
+    command: bash -c "rm /scrumsistant/frontend/node_modules/@angular/compiler-cli/ngcc/__ngcc_lock_file__ || /scrumsistant/frontend/node_modules/@angular/cli/bin/ng serve --host 0.0.0.0"
     ports:
       - "4200:4200"
+    volumes:
+      - ./frontend/src:/scrumsistant/frontend/src
+      - ./docker/proxy.conf.json:/scrumsistant/frontend/src/proxy.conf.json
+    links:
+      - flask
     depends_on:
       - redis
       - websocket
