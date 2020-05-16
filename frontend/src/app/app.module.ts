@@ -12,6 +12,7 @@ import {DashboardComponent} from './dashboard/dashboard.component'
 import {StandupComponent} from './standup/standup.component'
 import {NavComponent} from './nav/nav.component'
 import {LoginPageComponent} from './login-page/login-page.component'
+import {PmToolsComponent} from './pm-tools/pm-tools.component'
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import {LoginPageComponent} from './login-page/login-page.component'
     StandupComponent,
     NavComponent,
     LoginPageComponent,
+    PmToolsComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
   bootstrap: [AppComponent],

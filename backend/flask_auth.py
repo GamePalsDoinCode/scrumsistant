@@ -1,3 +1,4 @@
+import json
 import os
 
 import nacl.encoding  # type: ignore
@@ -49,7 +50,10 @@ def logout() -> FLASK_RESPONSE_TYPE:
 @public_endpoint
 def is_authenticated() -> FLASK_RESPONSE_TYPE:
     if current_user.is_authenticated(session):
-        return '', HTTP_STATUS_CODE.HTTP_200_OK.value
+        return (
+            current_user.serialize(skip_list=['password'], serialize_method=json.dumps,),
+            HTTP_STATUS_CODE.HTTP_200_OK.value,
+        )
     return '', HTTP_STATUS_CODE.HTTP_401_UNAUTHORIZED.value
 
 

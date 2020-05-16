@@ -30,6 +30,7 @@ class UserInfo:
     display_name: str = ''
     email: str = ''
     password: Optional[str] = None
+    is_PM: bool = False
 
     def serialize(
         self, skip_list=None, serialize_method=transform_to_redis_safe_dict,
@@ -49,6 +50,9 @@ class UserInfo:
         def _int_transformer(num_as_byte_string: bytes) -> int:
             return int(num_as_byte_string)
 
+        def _bool_transformer(bool_as_byte_string: bytes) -> bool:
+            return bool_as_byte_string.lower() == b'true'
+
         def _pk_transformer(pk_byte_string: bytes) -> int:
             return _int_transformer(pk_byte_string)
 
@@ -63,6 +67,9 @@ class UserInfo:
             if password_or_null == "null":
                 return None
             return password_or_null
+
+        def _is_PM_transformer(is_pm_byte_string: bytes) -> bool:
+            return _bool_transformer(is_pm_byte_string)
 
         return locals()[f"_{field_name}_transformer"]
 

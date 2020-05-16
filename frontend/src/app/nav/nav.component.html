@@ -12,6 +12,9 @@
     <li>
       <a routerLink="/app/retro">Sprint Retro!</a>
     </li>
+    <li *ngIf="authService.queryUser('is_PM')">
+      <a routerLink="/pm_tools">PM Tools!</a>
+    </li>
     <li (click)="logout()" class="navlist_item--clickable">
       Logout!
     </li>

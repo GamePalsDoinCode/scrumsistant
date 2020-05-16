@@ -1,19 +1,24 @@
 import {Injectable} from '@angular/core'
 import {HttpClient} from '@angular/common/http'
 import {Router, CanActivate, ActivatedRouteSnapshot} from '@angular/router'
+import {tap} from 'rxjs/operators'
+
+type valueof<T> = T[keyof T]
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService implements CanActivate {
   errorMessage = ''
-  user: Scrum.User = {email: '', pk: null, displayName: ''}
+  user: Scrum.User = {email: '', pk: null, displayName: '', is_PM: false}
 
   constructor(private http: HttpClient, private router: Router) {}
 
   isAuthenticated() {
-    // TODO: is this a bad idea to hit the backend on any route change?
-    return this.http.get('api/is_authenticated')
+    // TODO: is this a bad idea to hit the backend on any route change?  Let's say no!
+    return this.http
+      .get<Scrum.User>('api/is_authenticated')
+      .pipe(tap(user => (this.user = user)))
   }
   requestWebsocketAuthToken() {
     return this.http.get('api/get_websocket_auth_token')
@@ -31,11 +36,12 @@ export class AuthService implements CanActivate {
     this.http.post('/api/login', {...user}).subscribe(
       success => {
         this.user.email = user.email
-        this.router.navigate([redirectTo || '/app/dashboard'])
+        const redirectDefault = this.user.is_PM ? '/pm_tools' : '/app/dashboard'
+        this.router.navigate([redirectTo || redirectDefault])
       },
       error => {
         this.errorMessage = "Invalid Credentials!  We've got a saboteur!"
-        this.user = {email: '', pk: null, displayName: ''}
+        this.user = {email: '', pk: null, displayName: '', is_PM: false}
       }
     )
     return false
@@ -46,6 +52,10 @@ export class AuthService implements CanActivate {
       () => this.router.navigate(['/login']),
       () => this.router.navigate(['/login'])
     )
+  }
+
+  queryUser(property: string) {
+    return this?.user[property] ?? null
   }
 
   async canActivate(route: ActivatedRouteSnapshot) {

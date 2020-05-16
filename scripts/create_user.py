@@ -1,5 +1,6 @@
 import argparse
 import os
+import pdb
 import sys
 from typing import cast
 
@@ -15,16 +16,20 @@ from backend.scrum_types import RedisClient  # isort:skip
 parser = argparse.ArgumentParser(description="Create a user in Redis!",)
 
 parser.add_argument(
-    "email", metavar="email", type=str,
+    "email", type=str,
 )
 parser.add_argument(
-    "password", metavar="password", type=str,
+    "password", type=str,
 )
+
+parser.add_argument("is_PM", type=str)
 
 args = parser.parse_args()
 
 redis_client = cast(RedisClient, redis.Redis.from_url(REDIS_CONNECTION_URL))
 
-user = UserInfo(pk=UserInfo.get_new_pk(redis_client), email=args.email, display_name="")
+user = UserInfo(
+    pk=UserInfo.get_new_pk(redis_client), email=args.email, display_name="", is_PM=args.is_PM.lower() == "true",
+)
 user.set_password(args.password)
 user.save_new_user(redis_client)
