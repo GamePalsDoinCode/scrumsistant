@@ -23,11 +23,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Server:
-    def __init__(self, redis_client: RedisClient = None) -> None:
+    def __init__(self, host=None, redis_client: RedisClient = None) -> None:
         LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis: RedisClient
+        self.host = host
         if redis_client:  # pragma: no cover
             self.redis = redis_client
         else:  # pragma: no cover
@@ -159,8 +160,9 @@ class Server:
                     #     await handle_get_usernames(websocket)
             finally:
                 await self.unregister(websocket)
+
     def get_server_task(self, func, route="localhost", port=8000):  # pylint: disable=no-self-use
-        start_server = websockets.serve(func, route, port)
+        start_server = websockets.serve(func, host=self.host or '0.0.0.0', port=port)
         return start_server
 
     def run(self, loop: asyncio.AbstractEventLoop = None) -> None:
