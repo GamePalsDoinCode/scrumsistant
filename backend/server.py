@@ -28,9 +28,9 @@ class Server:
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis: RedisClient
-        if redis_client:
+        if redis_client:  # pragma: no cover
             self.redis = redis_client
-        else:
+        else:  # pragma: no cover
             self.redis = cast(RedisClient, redis.Redis.from_url(REDIS_CONNECTION_URL))
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
@@ -132,9 +132,7 @@ class Server:
         user_pk = self.redis.get(AuthToken(token))
         if not user_pk:
             raise RedisKeyNotFoundError
-        user = _load_user(Users(user_pk), self.redis)
-        if not user:
-            raise RedisKeyNotFoundError
+        user = _load_user(Users(user_pk), self.redis)  # will raise if not found
         self.redis.delete(AuthToken(token))
         return user
 
@@ -143,21 +141,24 @@ class Server:
             init_message = json.loads(await websocket.recv())  # can throw error, will just hit the unregister
             print(init_message)
             if init_message.get('msg') == 'authTokenVerification':
-                user = self.verify_websocket_auth(init_message['data'])  # can throw error
-                await self.register(websocket, user)
+                try:
+                    user = self.verify_websocket_auth(init_message['data'])  # can throw error
+                    await self.register(websocket, user)
+                except Exception as e:
+                    await websocket.close()
             else:
                 await websocket.close()
-        try:
-            async for message in websocket:
-                data = json.loads(message)
-                print(data)
-                # if data['type'] == MessageType.USER_JOINED.value:
-                #     await handle_new_user_joined(websocket, data)
-                # elif data['type'] == 'getUsernames':
-                #     await handle_get_usernames(websocket)
-        finally:
-            await self.unregister(websocket)
-
+        else:
+            try:
+                async for message in websocket:
+                    data = json.loads(message)
+                    print(data)
+                    # if data['type'] == MessageType.USER_JOINED.value:
+                    #     await handle_new_user_joined(websocket, data)
+                    # elif data['type'] == 'getUsernames':
+                    #     await handle_get_usernames(websocket)
+            finally:
+                await self.unregister(websocket)
     def get_server_task(self, func, route="localhost", port=8000):  # pylint: disable=no-self-use
         start_server = websockets.serve(func, route, port)
         return start_server

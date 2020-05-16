@@ -74,7 +74,7 @@ class UserInfo:
         return locals()[f"_{field_name}_transformer"]
 
     @staticmethod
-    def deserialize(serialized_obj: Mapping[bytes, bytes], from_redis: bool = True) -> 'UserInfo':
+    def deserialize(serialized_obj, from_redis=True) -> 'UserInfo':
         new_obj = UserInfo(pk=-1,)
 
         if from_redis:
@@ -82,7 +82,8 @@ class UserInfo:
             for k, v in serialized_obj.items():
                 key_str = k.decode("utf8")
                 ser[key_str] = UserInfo.redis_transformers(key_str)(v)
-
+        else:
+            ser = serialized_obj
         return dataclass_replace(new_obj, **ser)
 
     # methods required by flask-login
@@ -105,7 +106,7 @@ class UserInfo:
         self.password = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
-        if not self.password:
+        if self.password is None:
             return False
         return check_password_hash(self.password, password)
 
