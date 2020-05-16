@@ -10,7 +10,7 @@ def cleanup_redis_dict(dict_from_redis: Dict[bytes, bytes]) -> Dict[str, str]:
 def transform_to_redis_safe_dict(dict_with_nones_or_bool: Dict[Any, Any]) -> REDIS_SAFE_DICT_INPUT:
     # this will turn any toplevel None values -> 'null', and any bools to the string version of their value
     none_dict = {k: 'null' for k, v in dict_with_nones_or_bool.items() if v is None}
-    bool_dict = {k: str(v) for k, v in dict_with_nones_or_bool.items() if type(v) == bool}
+    bool_dict = {k: str(v) for k, v in dict_with_nones_or_bool.items() if isinstance(v, bool)}
     handled_keys = none_dict.keys() | bool_dict.keys()
 
     the_rest = {k: v for k, v in dict_with_nones_or_bool.items() if not k in handled_keys}

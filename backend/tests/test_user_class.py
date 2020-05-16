@@ -3,7 +3,7 @@ import os
 
 import pytest
 from hypothesis import assume, given, settings
-from hypothesis.strategies import emails, integers, none, one_of, text
+from hypothesis.strategies import booleans, emails, integers, none, one_of, text
 
 from ..exceptions import UserNameTakenError
 from ..structs import UserInfo
@@ -11,13 +11,19 @@ from .app_fixtures import *
 from .user_fixtures import *
 
 
-@given(pk=integers(), display_name=text(min_size=1), email=emails(), password=one_of(none(), text(min_size=1)))
+@given(
+    pk=integers(),
+    display_name=text(min_size=1),
+    email=emails(),
+    password=one_of(none(), text(min_size=1)),
+    is_PM=booleans(),
+)
 @settings(max_examples=10)  # something about this takes forever!
 @pytest.mark.filterwarnings(
     'ignore:.*'
 )  # this test warns that the fixture is not reset each test run and recommends using a context manager, which we do. so i want to disable just that warning, but the regex filtering any more specific than that isnt working TODO
-def test_serialize_deserialize_roundtrip_through_redis(redis, pk, display_name, email, password):
-    user = UserInfo(pk=pk, display_name=display_name, email=email)
+def test_serialize_deserialize_roundtrip_through_redis(redis, pk, display_name, email, password, is_PM):
+    user = UserInfo(pk=pk, display_name=display_name, email=email, is_PM=is_PM)
     if password:
         user.set_password(password)
     with hypothesis_safe_redis(redis) as redis:
