@@ -11,6 +11,9 @@ from .user_fixtures import *
 
 
 @given(dictionaries(text(min_size=1), text(min_size=1), min_size=1))
+@pytest.mark.filterwarnings(
+    'ignore:.*'
+)  # this test warns that the fixture is not reset each test run and recommends using a context manager, which we do. so i want to disable just that warning, but the regex filtering any more specific than that isnt working TODO
 def test_redis_round_trip(redis, test_dict):
     # procedure -
     # - generate random dict
@@ -23,12 +26,11 @@ def test_redis_round_trip(redis, test_dict):
     # so this is not a full test of the transform function
 
     redis_safe_dict = transform_to_redis_safe_dict(test_dict)
-    redis.hmset('key', redis_safe_dict)
-    redised_dict = redis.hgetall('key')
-    normal_dict = cleanup_redis_dict(redised_dict)
-    assert normal_dict == test_dict
-    redis.delete('key')  # this is because fixtures are not reset between hypothesis runs
-
+    with hypothesis_safe_redis(redis) as redis:
+        redis.hmset('key', redis_safe_dict)
+        redised_dict = redis.hgetall('key')
+        normal_dict = cleanup_redis_dict(redised_dict)
+        assert normal_dict == test_dict
 
 def test__load_user_loads_correct_user(redis, user):
     # objects compare on identity so would fail
