@@ -161,7 +161,7 @@ class Server:
             finally:
                 await self.unregister(websocket)
 
-    def get_server_task(self, func, route="localhost", port=8000):  # pylint: disable=no-self-use
+    def get_server_task(self, func, port=8000):  # pylint: disable=no-self-use
         start_server = websockets.serve(func, host=self.host or '0.0.0.0', port=port)
         return start_server
 

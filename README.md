@@ -16,6 +16,10 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
 
 ## First Time Running Code
 
+### Using Docker
+
+* If you can install [docker](https://docs.docker.com/engine/install/) and [docker compose](https://docs.docker.com/compose/install/) (and make I guess) then you can simply `make run`!  After setting up the local settings.  Then to add a user run `sudo docker-compose exec flask bash` - this will drop you into a place you can run scripts
+
 ### Frontend
 * **NPM**
     * Make sure you have node.js and npm [installed](https://www.npmjs.com/get-npm)
@@ -47,8 +51,9 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
 * **Local Settings**
     * Create a `backend/local_settings.py` file, and populate it like so:
     ```python
+    import os
     SERVER_NAME = 'me'
-    REDIS_URL = 'localhost'
+    REDIS_URL = os.environ.get('REDIS_URL','localhost')
     REDIS_PASSWORD = ''
     REDIS_PORT = 6379
     REDIS_DB = 0
