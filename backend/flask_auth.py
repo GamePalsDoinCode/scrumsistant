@@ -65,7 +65,7 @@ def get_websocket_auth_token() -> FLASK_RESPONSE_TYPE:
     signing_key = nacl.signing.SigningKey(FLASK_SECRET_KEY[:32])
     signed_message = signing_key.sign(token).hex()
     verify_key = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder).decode('utf8')
-    user_pk = current_user.pk
+    user_pk = current_user.id
     current_app.redis_client.setex(AuthToken(token), 10, user_pk)
     return {
         'signedToken': signed_message,

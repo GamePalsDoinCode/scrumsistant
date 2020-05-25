@@ -138,7 +138,7 @@ class Server:
         user_pk = self.redis.get(AuthToken(token))
         if not user_pk:
             raise RedisKeyNotFoundError
-        user = _load_user(str(user_pk), self.db)  # will raise if not found
+        user = _load_user(user_pk.decode('utf8'), self.db)  # will raise if not found
         self.redis.delete(AuthToken(token))
         return user
 
@@ -151,6 +151,9 @@ class Server:
                     user = self.verify_websocket_auth(init_message['data'])  # can throw error
                     await self.register(websocket, user)
                 except Exception as e:
+                    import traceback
+
+                    traceback.print_exc()
                     await websocket.close()
             else:
                 await websocket.close()
