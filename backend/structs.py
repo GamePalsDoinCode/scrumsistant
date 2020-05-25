@@ -5,10 +5,11 @@ from enum import Enum
 from typing import Any, Callable, Dict, Literal, Mapping, Optional, Union
 
 from flask_login import AnonymousUserMixin
+from sqlalchemy.dialects.postgresql import insert
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .db_schema import Users
 from .exceptions import UserNameTakenError
-from .redis_schema import CurrentPKTable, PKByEmail, Users
 from .scrum_types import RedisClient
 from .utils import transform_to_redis_safe_dict
 
@@ -26,7 +27,7 @@ class AnonymousUserWrapper(AnonymousUserMixin):
 
 @dataclass
 class UserInfo:
-    pk: int
+    id: Optional[int] = None  # when making a new user, wait for postgres to assign the pk
     display_name: str = ''
     email: str = ''
     password: Optional[str] = None
@@ -110,17 +111,18 @@ class UserInfo:
             return False
         return check_password_hash(self.password, password)
 
-    def save_new_user(self, redis_client: RedisClient) -> None:
-        self._check_not_overwriting(redis_client)
-        redis_client.set(PKByEmail(self.email), self.pk)
-        redis_client.hmset(Users(self.pk), self.serialize())
-
-    def update_user(self, redis_client: RedisClient) -> 'UserInfo':
-        self._check_not_overwriting(redis_client)
-        redis_client.hmset(Users(self.pk), self.serialize())
-        updated_model_dict = redis_client.hgetall(Users(self.pk))
-        updated_model = UserInfo.deserialize(updated_model_dict)
-        return updated_model
+    def save(self, conn) -> None:
+        serialized_user = self.serialize(serialize_method=dict)
+        if serialized_user['id'] is None:
+            serialized_user.pop('id')
+            # if this is a new user, the id in python will be None
+            # if you leave it lke that, pg will try to insert null
+            # rather than assigning a new pk [which we want]
+        save_statement = insert(Users).values(serialized_user,)
+        update_on_conflict = save_statement.on_conflict_do_update(
+            index_elements=['id'], set_=self.serialize(skip_list=['id'], serialize_method=dict),
+        )
+        conn.execute(update_on_conflict)
 
     def _check_not_overwriting(self, redis_client: RedisClient) -> None:
         pk_associated_with_my_username_dirty = redis_client.get(PKByEmail(self.email))  # by dirty I mean, its bytes atm
