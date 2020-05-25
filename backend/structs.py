@@ -34,7 +34,7 @@ class UserInfo:
     is_PM: bool = False
 
     def serialize(
-        self, skip_list=None, serialize_method=transform_to_redis_safe_dict,
+        self, skip_list=None, serialize_method=dict,
     ):
         # typed in stub file!
         if skip_list is None:
@@ -44,52 +44,13 @@ class UserInfo:
         return serialize_method(reduced_serialized_form)
 
     @staticmethod
-    def redis_transformers(field_name: str) -> Callable[[bytes], Union[str, int, Union[None, str]]]:
-        def _string_transformer(byte_string: bytes) -> str:
-            return byte_string.decode("utf8")
-
-        def _int_transformer(num_as_byte_string: bytes) -> int:
-            return int(num_as_byte_string)
-
-        def _bool_transformer(bool_as_byte_string: bytes) -> bool:
-            return bool_as_byte_string.lower() == b'true'
-
-        def _pk_transformer(pk_byte_string: bytes) -> int:
-            return _int_transformer(pk_byte_string)
-
-        def _email_transformer(name_byte_string: bytes) -> str:
-            return _string_transformer(name_byte_string)
-
-        def _display_name_transformer(display_name_byte_string: bytes) -> str:
-            return _string_transformer(display_name_byte_string)
-
-        def _password_transformer(password_byte_string: bytes) -> Union[None, str]:
-            password_or_null = _string_transformer(password_byte_string)
-            if password_or_null == "null":
-                return None
-            return password_or_null
-
-        def _is_PM_transformer(is_pm_byte_string: bytes) -> bool:
-            return _bool_transformer(is_pm_byte_string)
-
-        return locals()[f"_{field_name}_transformer"]
-
-    @staticmethod
-    def deserialize(serialized_obj, from_redis=True) -> 'UserInfo':
-        new_obj = UserInfo(pk=-1,)
-
-        if from_redis:
-            ser = {}
-            for k, v in serialized_obj.items():
-                key_str = k.decode("utf8")
-                ser[key_str] = UserInfo.redis_transformers(key_str)(v)
-        else:
-            ser = serialized_obj
-        return dataclass_replace(new_obj, **ser)
+    def deserialize(serialized_obj) -> 'UserInfo':
+        new_obj = UserInfo(id=-1,)
+        return dataclass_replace(new_obj, **serialized_obj)
 
     # methods required by flask-login
     def is_authenticated(self, session: Mapping[str, Dict[str, Any]]) -> bool:
-        return session.get("_user_id") == Users(self.pk)
+        return session.get("_user_id") == str(self.id)
 
     def is_active(self) -> Literal[True]:  # pylint: disable=no-self-use # pragma: no cover
         # This method is required by the flask-login library, but we don't really have this concept
@@ -99,9 +60,9 @@ class UserInfo:
         return self.email == ''
 
     def get_id(self) -> str:
-        return Users(self.pk)
+        return str(self.id)  # per docs, this method _must_ return string
 
-    # end login required methods
+    # end flask-login required methods
 
     def set_password(self, password: str) -> None:
         self.password = generate_password_hash(password)
@@ -120,21 +81,9 @@ class UserInfo:
             # rather than assigning a new pk [which we want]
         save_statement = insert(Users).values(serialized_user,)
         update_on_conflict = save_statement.on_conflict_do_update(
-            index_elements=['id'], set_=self.serialize(skip_list=['id'], serialize_method=dict),
+            index_elements=['id'], set_=self.serialize(skip_list=['id']),
         )
         conn.execute(update_on_conflict)
-
-    def _check_not_overwriting(self, redis_client: RedisClient) -> None:
-        pk_associated_with_my_username_dirty = redis_client.get(PKByEmail(self.email))  # by dirty I mean, its bytes atm
-        if not pk_associated_with_my_username_dirty:
-            return
-        pk = int(pk_associated_with_my_username_dirty)
-        if self.pk != pk:
-            raise UserNameTakenError
-
-    @staticmethod
-    def get_new_pk(redis_client: RedisClient) -> int:
-        return int(redis_client.incr(CurrentPKTable()))
 
 
 class MessageType(Enum):

@@ -4,3 +4,7 @@ class RedisKeyNotFoundError(Exception):
 
 class UserNameTakenError(Exception):
     pass
+
+
+class UserNotFound(Exception):
+    pass

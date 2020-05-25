@@ -10,29 +10,34 @@ import nacl.encoding  # type: ignore
 import nacl.signing  # type: ignore
 import redis
 import websockets
+from sqlalchemy import create_engine
 
 from .exceptions import RedisKeyNotFoundError
 from .flask_utils import _load_user
-from .local_settings import REDIS_CONNECTION_URL, SERVER_NAME
-from .redis_schema import AuthToken, CurrentUsers, OwnsConnection, Users
-from .scrum_types import WEBSOCKET_TEMP_TYPE, RedisClient
+from .local_settings import POSTGRES_URL, REDIS_CONNECTION_URL, SERVER_NAME
+from .redis_schema import AuthToken, CurrentUsers, OwnsConnection
+from .scrum_types import WEBSOCKET_TEMP_TYPE, AuthInfoPacket, RedisClient
 from .structs import UserInfo
-from .utils import cleanup_redis_dict
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Server:
-    def __init__(self, host=None, redis_client: RedisClient = None) -> None:
+    def __init__(self, host=None, redis_client: RedisClient = None, db=None) -> None:
         LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis: RedisClient
-        self.host = host
+        self.host = host or '0.0.0.0'
         if redis_client:  # pragma: no cover
             self.redis = redis_client
         else:  # pragma: no cover
             self.redis = cast(RedisClient, redis.Redis.from_url(REDIS_CONNECTION_URL))
+        if db:  # pragma: no cover
+            self.db = db
+        else:  # pragma: no cover
+            engine = create_engine(POSTGRES_URL)
+            self.db = engine.connect()
         redis_pubsub_instance = self.redis.pubsub(ignore_subscribe_messages=True,)
         redis_pubsub_instance.subscribe(
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
@@ -53,17 +58,17 @@ class Server:
         self._redis_pubsub_thread.stop()
 
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE, user: UserInfo) -> None:
-        # existing_user = self.redis.hgetall(Users())
+        assert user.id is not None  # mostly to convince mypy that its an int at this point
 
-        self.websocket_info_dict[websocket] = user.pk
+        self.websocket_info_dict[websocket] = user.id
         print("registered", self.websocket_info_dict)
         self.redis.set(
-            OwnsConnection(user.pk), self.SERVER_NAME,
+            OwnsConnection(user.id), self.SERVER_NAME,
         )
-        self.redis.sadd(CurrentUsers(), user.pk)
+        self.redis.sadd(CurrentUsers(), user.id)
         socket_message = {
             "type": "confirmJoined",
-            "pk": user.pk,
+            "pk": user.id,
         }
         await websocket.send(json.dumps(socket_message))
 
@@ -126,14 +131,14 @@ class Server:
                 task = loop.create_task(self.broadcast(message, publish_to_redis=False,))
                 loop.run_until_complete(task)
 
-    def verify_websocket_auth(self, auth_info: Dict[str, str]) -> UserInfo:
+    def verify_websocket_auth(self, auth_info: AuthInfoPacket) -> UserInfo:
         signed_token = codecs.decode(auth_info['signedToken'], 'hex')
         verify_key = nacl.signing.VerifyKey(auth_info['verifyKey'].encode('utf8'), encoder=nacl.encoding.HexEncoder)
         token = verify_key.verify(signed_token)
         user_pk = self.redis.get(AuthToken(token))
         if not user_pk:
             raise RedisKeyNotFoundError
-        user = _load_user(Users(user_pk), self.redis)  # will raise if not found
+        user = _load_user(str(user_pk), self.db)  # will raise if not found
         self.redis.delete(AuthToken(token))
         return user
 
@@ -161,8 +166,8 @@ class Server:
             finally:
                 await self.unregister(websocket)
 
-    def get_server_task(self, func, route="localhost", port=8000):  # pylint: disable=no-self-use
-        start_server = websockets.serve(func, host=self.host or '0.0.0.0', port=port)
+    def get_server_task(self, func, port=8000):
+        start_server = websockets.serve(func, host=self.host, port=port)
         return start_server
 
     def run(self, loop: asyncio.AbstractEventLoop = None) -> None:

@@ -5,14 +5,14 @@ import nacl.encoding  # type: ignore
 import nacl.signing  # type: ignore
 from flask import Blueprint, current_app, request, session
 from flask_login import current_user, login_user, logout_user
+from sqlalchemy.sql import select
 
-from .exceptions import RedisKeyNotFoundError
+from .db_schema import Users
 from .flask_main import public_endpoint
 from .local_settings import FLASK_SECRET_KEY
-from .query_tools import get_user_by_email
 from .redis_schema import AuthToken
 from .scrum_types import FLASK_RESPONSE_TYPE
-from .structs import HTTP_STATUS_CODE
+from .structs import HTTP_STATUS_CODE, UserInfo
 
 bp = Blueprint('auth', __name__)
 
@@ -26,9 +26,11 @@ def login() -> FLASK_RESPONSE_TYPE:
 
     not_allowed_return_val = {'auth': 'not ok'}, HTTP_STATUS_CODE.HTTP_401_UNAUTHORIZED.value
 
-    try:
-        user = get_user_by_email(user_email, current_app.redis_client)
-    except RedisKeyNotFoundError:
+    query = select([Users]).where(Users.c.email == user_email)
+    result = current_app.db.execute(query).fetchone()
+    if result:
+        user = UserInfo.deserialize(result)
+    else:
         return not_allowed_return_val
 
     password_ok = user.check_password(incoming_password)
