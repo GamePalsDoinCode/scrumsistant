@@ -1,4 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+/* 
+ * Global Styles
+ */
+
+/* Color Vars */
+// Swatches
+$c-black: #000000;
+$c-white: #FFF;
+$c-sunflower: #fed359;
+$c-surf: #9dd098;
+
+/* Abstracted Color Vars (easier to edit here once if colors ever change) */
+// Primaries
+$c-primary-a: $c-black;
+$c-primary-b: $c-white;
+
+// Secondaries
+$c-secondary-a: $c-sunflower;
+$c-secondary-b: $c-surf;
+
+/* Components */
 @import 'app/nav/nav.component';
 @import 'app/dashboard/dashboard.component';
 @import 'app/pointing/pointing.component';
