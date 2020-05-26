@@ -1,6 +1,10 @@
 language: python
 python:
   - 3.8
+services:
+  - postgresql
+addons:
+  - postgresql: "11.8"
 cache:
   directories:
     - $HOME/.cache/pip
@@ -11,7 +15,10 @@ install:
   - pip install -r backend/requirements.txt
 before_script:
   - touch backend/local_settings.py
-  - echo "FLASK_SECRET_KEY=b'11111111111111111111111111111111';REDIS_CONNECTION_URL='redis://:trash@trash:5555/0';SERVER_NAME='me';" > backend/local_settings.py
+  - psql -c 'create database scrumsistant;' -U postgres
+  - echo "FLASK_SECRET_KEY=b'11111111111111111111111111111111';REDIS_CONNECTION_URL='redis://:trash@trash:5555/0';POSTGRES_URL='postgres://postgres:@localhost:5432/scrumsistant';SERVER_NAME='me';" > backend/local_settings.py
+  - sed -in 's/django:.*\@/postgres:@/p' alembic.ini
+  - alembic update head
 script:
   - pytest --cov=scrumsistant backend/tests
 after_success:
