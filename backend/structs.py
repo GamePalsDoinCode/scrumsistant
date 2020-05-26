@@ -83,7 +83,9 @@ class UserInfo:
         update_on_conflict = save_statement.on_conflict_do_update(
             index_elements=['id'], set_=self.serialize(skip_list=['id']),
         )
-        conn.execute(update_on_conflict)
+        result = conn.execute(update_on_conflict)
+        if result.inserted_primary_key:
+            self.id = result.inserted_primary_key[0]
 
 
 class MessageType(Enum):

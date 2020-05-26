@@ -19,7 +19,8 @@ def user(websocket_server, faker):
             is_PM = random.random() > 0.5
         new_user = UserInfo(email=email, display_name=display_name, is_PM=is_PM)
         new_user.set_password(password)
-        new_user.save_new_user(websocket_server.redis)
+        new_user.save(websocket_server.db)
+        # now we
         return new_user
 
     return _user
