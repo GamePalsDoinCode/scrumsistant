@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from ..redis_schema import CurrentUsers, OwnsConnection, Users
+from ..redis_schema import CurrentUsers, OwnsConnection
 from .app_fixtures import *
 from .user_fixtures import *
 

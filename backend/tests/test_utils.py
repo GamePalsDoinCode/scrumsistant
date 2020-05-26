@@ -4,7 +4,6 @@ from hypothesis.strategies import dictionaries, text
 
 from ..exceptions import RedisKeyNotFoundError
 from ..flask_utils import _load_user, load_user
-from ..redis_schema import Users
 from ..utils import cleanup_redis_dict, transform_to_redis_safe_dict
 from .app_fixtures import *
 from .user_fixtures import *
@@ -32,17 +31,18 @@ def test_redis_round_trip(redis, test_dict):
         normal_dict = cleanup_redis_dict(redised_dict)
         assert normal_dict == test_dict
 
+
 def test__load_user_loads_correct_user(redis, user):
     # objects compare on identity so would fail
     # so we will compare serialized versions
     new_user = user()
-    loaded_user = _load_user(Users(new_user.pk), redis)
+    loaded_user = _load_user(str(new_user.id), redis)
     assert new_user.serialize() == loaded_user.serialize()
 
 
 def test__load_user_throws_exception_when_user_not_found(redis):
     with pytest.raises(RedisKeyNotFoundError):
-        _load_user(Users(1), redis)
+        _load_user(str(1), redis)
 
 
 def test_load_user_returns_none_when_user_not_found(flask_app):
