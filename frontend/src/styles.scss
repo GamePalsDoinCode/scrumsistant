@@ -1,24 +1,32 @@
-/* 
- * Global Styles
+/*=============
+ Global Styles
+ =============*/
+
+/**
+ * Color
+ *
+ * The abstracted vars should be used for color declarations, not the color
+ * swatches. This ensures that, if the brand colors change in the future, they
+ * only need to be edited once, here.
  */
 
-/* Color Vars */
 // Swatches
 $c-black: #000000;
 $c-white: #FFF;
 $c-sunflower: #fed359;
 $c-surf: #9dd098;
 
-/* Abstracted Color Vars (easier to edit here once if colors ever change) */
-// Primaries
+// Abstracted Primaries
 $c-primary-a: $c-black;
 $c-primary-b: $c-white;
 
-// Secondaries
+// Abstracted Secondaries
 $c-secondary-a: $c-sunflower;
 $c-secondary-b: $c-surf;
 
-/* Components */
+/*============= 
+Components 
+=============*/
 @import 'app/nav/nav.component';
 @import 'app/dashboard/dashboard.component';
 @import 'app/pointing/pointing.component';
