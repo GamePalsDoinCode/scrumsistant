@@ -18,6 +18,7 @@ before_script:
   - sed -i 's/django:.*\@/postgres:\@/' backend/alembic.ini
   # - sed -i 's/= migrations/= backend\/migrations/' backend/alembic.ini
   - cd backend && alembic upgrade head
+  - cd ..
   # - alembic -c backend/alembic.ini upgrade head
 script:
   - pytest --cov=scrumsistant backend/tests
