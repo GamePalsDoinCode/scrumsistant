@@ -15,8 +15,8 @@ before_script:
   - touch backend/local_settings.py
   - psql -c 'create database scrumsistant;' -U postgres
   - echo "FLASK_SECRET_KEY=b'11111111111111111111111111111111';REDIS_CONNECTION_URL='redis://:trash@trash:5555/0';POSTGRES_URL='postgres://postgres:@localhost:5432/scrumsistant';SERVER_NAME='me';" > backend/local_settings.py
-  - sed -i -n 's/django:.*\@/postgres:@/p' backend/alembic.ini
-  - sed -i -n 's/= migrations/= backend\/migrations/' backend/alembic.ini
+  - sed -i 's/django:.*\@/postgres:\@/' backend/alembic.ini
+  - sed -i 's/= migrations/= backend\/migrations/' backend/alembic.ini
   - alembic -c backend/alembic.ini upgrade head
 script:
   - pytest --cov=scrumsistant backend/tests
