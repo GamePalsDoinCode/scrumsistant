@@ -151,9 +151,6 @@ class Server:
                     user = self.verify_websocket_auth(init_message['data'])  # can throw error
                     await self.register(websocket, user)
                 except Exception as e:
-                    import traceback
-
-                    traceback.print_exc()
                     await websocket.close()
             else:
                 await websocket.close()
