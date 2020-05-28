@@ -4,10 +4,8 @@ from flask import Blueprint, current_app, request
 from flask_login import current_user
 
 from .query_tools import get_user_by_pk
-from .redis_schema import CurrentUsers, Users
 from .scrum_types import FLASK_RESPONSE_TYPE
 from .structs import HTTP_STATUS_CODE
-from .utils import cleanup_redis_dict
 
 bp = Blueprint('users_api', __name__)
 
@@ -16,23 +14,23 @@ bp = Blueprint('users_api', __name__)
 def user_pk(user_pk) -> FLASK_RESPONSE_TYPE:
     if request.method == 'GET':
         user_pk = request.view_args['user_pk']
-        user = get_user_by_pk(user_pk, current_app.redis_client)
+        user = get_user_by_pk(user_pk, current_app.db)
         return user.serialize(serialize_method=json.dumps)
     elif request.method == 'POST':
         user = current_user
         post_data = request.get_json()
         display_name = post_data['displayName']
         user.display_name = display_name
-        user = user.update_user(current_app.redis_client)
+        user.save(current_app.db)
 
         message_for_browser = {
             'type': 'userJoined',
             'displayName': user.display_name,
-            'pk': user.pk,
+            'pk': user.id,
         }
         ipc_message = {
             'messageType': 'userUpdated',
-            'pk': user.pk,
+            'pk': user.id,
             'broadcastTo': 'all',
             'message': json.dumps(message_for_browser),
         }
