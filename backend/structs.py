@@ -5,10 +5,11 @@ from enum import Enum
 from typing import Any, Callable, Dict, Literal, Mapping, Optional, Union
 
 from flask_login import AnonymousUserMixin
+from sqlalchemy.dialects.postgresql import insert
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .db_schema import Users
 from .exceptions import UserNameTakenError
-from .redis_schema import CurrentPKTable, PKByEmail, Users
 from .scrum_types import RedisClient
 from .utils import transform_to_redis_safe_dict
 
@@ -26,13 +27,14 @@ class AnonymousUserWrapper(AnonymousUserMixin):
 
 @dataclass
 class UserInfo:
-    pk: int
+    id: Optional[int] = None  # when making a new user, wait for postgres to assign the pk
     display_name: str = ''
     email: str = ''
     password: Optional[str] = None
+    is_PM: bool = False
 
     def serialize(
-        self, skip_list=None, serialize_method=transform_to_redis_safe_dict,
+        self, skip_list=None, serialize_method=dict,
     ):
         # typed in stub file!
         if skip_list is None:
@@ -42,45 +44,13 @@ class UserInfo:
         return serialize_method(reduced_serialized_form)
 
     @staticmethod
-    def redis_transformers(field_name: str) -> Callable[[bytes], Union[str, int, Union[None, str]]]:
-        def _string_transformer(byte_string: bytes) -> str:
-            return byte_string.decode("utf8")
-
-        def _int_transformer(num_as_byte_string: bytes) -> int:
-            return int(num_as_byte_string)
-
-        def _pk_transformer(pk_byte_string: bytes) -> int:
-            return _int_transformer(pk_byte_string)
-
-        def _email_transformer(name_byte_string: bytes) -> str:
-            return _string_transformer(name_byte_string)
-
-        def _display_name_transformer(display_name_byte_string: bytes) -> str:
-            return _string_transformer(display_name_byte_string)
-
-        def _password_transformer(password_byte_string: bytes) -> Union[None, str]:
-            password_or_null = _string_transformer(password_byte_string)
-            if password_or_null == "null":
-                return None
-            return password_or_null
-
-        return locals()[f"_{field_name}_transformer"]
-
-    @staticmethod
-    def deserialize(serialized_obj: Mapping[bytes, bytes], from_redis: bool = True) -> 'UserInfo':
-        new_obj = UserInfo(pk=-1,)
-
-        if from_redis:
-            ser = {}
-            for k, v in serialized_obj.items():
-                key_str = k.decode("utf8")
-                ser[key_str] = UserInfo.redis_transformers(key_str)(v)
-
-        return dataclass_replace(new_obj, **ser)
+    def deserialize(serialized_obj) -> 'UserInfo':
+        new_obj = UserInfo(id=-1,)
+        return dataclass_replace(new_obj, **serialized_obj)
 
     # methods required by flask-login
     def is_authenticated(self, session: Mapping[str, Dict[str, Any]]) -> bool:
-        return session.get("_user_id") == Users(self.pk)
+        return session.get("_user_id") == str(self.id)
 
     def is_active(self) -> Literal[True]:  # pylint: disable=no-self-use # pragma: no cover
         # This method is required by the flask-login library, but we don't really have this concept
@@ -90,41 +60,32 @@ class UserInfo:
         return self.email == ''
 
     def get_id(self) -> str:
-        return Users(self.pk)
+        return str(self.id)  # per docs, this method _must_ return string
 
-    # end login required methods
+    # end flask-login required methods
 
     def set_password(self, password: str) -> None:
         self.password = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
-        if not self.password:
+        if self.password is None:
             return False
         return check_password_hash(self.password, password)
 
-    def save_new_user(self, redis_client: RedisClient) -> None:
-        self._check_not_overwriting(redis_client)
-        redis_client.set(PKByEmail(self.email), self.pk)
-        redis_client.hmset(Users(self.pk), self.serialize())
-
-    def update_user(self, redis_client: RedisClient) -> 'UserInfo':
-        self._check_not_overwriting(redis_client)
-        redis_client.hmset(Users(self.pk), self.serialize())
-        updated_model_dict = redis_client.hgetall(Users(self.pk))
-        updated_model = UserInfo.deserialize(updated_model_dict)
-        return updated_model
-
-    def _check_not_overwriting(self, redis_client: RedisClient) -> None:
-        pk_associated_with_my_username_dirty = redis_client.get(PKByEmail(self.email))  # by dirty I mean, its bytes atm
-        if not pk_associated_with_my_username_dirty:
-            return
-        pk = int(pk_associated_with_my_username_dirty)
-        if self.pk != pk:
-            raise UserNameTakenError
-
-    @staticmethod
-    def get_new_pk(redis_client: RedisClient) -> int:
-        return int(redis_client.incr(CurrentPKTable()))
+    def save(self, conn) -> None:
+        serialized_user = self.serialize(serialize_method=dict)
+        if serialized_user['id'] is None:
+            serialized_user.pop('id')
+            # if this is a new user, the id in python will be None
+            # if you leave it lke that, pg will try to insert null
+            # rather than assigning a new pk [which we want]
+        save_statement = insert(Users).values(serialized_user,)
+        update_on_conflict = save_statement.on_conflict_do_update(
+            index_elements=['id'], set_=self.serialize(skip_list=['id']),
+        )
+        result = conn.execute(update_on_conflict)
+        if result.inserted_primary_key:
+            self.id = result.inserted_primary_key[0]
 
 
 class MessageType(Enum):

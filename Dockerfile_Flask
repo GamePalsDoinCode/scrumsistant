@@ -1,0 +1,11 @@
+FROM python:3.8.2
+ENV PYTHONBUFFERED 1
+ENV FLASK_APP flask_main.py
+ENV FLASK_ENV development
+
+WORKDIR /scrumsistant
+RUN apt-get update && apt-get -y upgrade
+COPY backend /scrumsistant/backend
+COPY wait-for-it.sh /scrumsistant/wait-for-it.sh
+RUN pip install -r /scrumsistant/backend/requirements.txt
+RUN mkdir -p /var/log/scrumsistant && touch /var/log/scrumsistant/scrum.log

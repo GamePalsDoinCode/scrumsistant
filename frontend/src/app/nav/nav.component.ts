@@ -13,4 +13,8 @@ export class NavComponent implements OnInit {
   logout() {
     this.authService.logout()
   }
+
+  isPM() {
+    return this.authService.queryUser('is_PM')
+  }
 }

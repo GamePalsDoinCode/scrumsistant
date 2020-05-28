@@ -1,5 +1,7 @@
 from typing import Any, Dict, NewType, Tuple, Union
 
+from typing_extensions import TypedDict
+
 RedisKey = NewType('RedisKey', str)
 RedisKeyAllowedInput = Union[str, int, bytes]
 
@@ -62,3 +64,6 @@ class RedisClient:
 
     def incr(self, key: RedisKey) -> REDIS_SCALAR_OUTPUT:
         ...
+
+
+AuthInfoPacket = TypedDict('AuthInfoPacket', {'signedToken': bytes, 'verifyKey': str})

@@ -14,6 +14,7 @@ export class DashboardComponent implements OnInit {
     displayName: 'Punk',
     pk: null,
     email: '',
+    is_PM: false,
   }
   nameLocked = false
   broadcastMsg = ''

@@ -1,11 +1,20 @@
+from contextlib import contextmanager
+
 import fakeredis
 import pytest
 import websockets
 
 from ..flask_main import create_app as create_flask_server
 from ..server import Server
+from .pg_fixtures import *
 
 WEBSOCKET_URI = "ws://localhost:8000"
+
+
+@contextmanager
+def hypothesis_safe_redis(redis):
+    yield redis
+    redis.flushall()
 
 
 @pytest.fixture
@@ -14,24 +23,24 @@ def redis(event_loop):
 
 
 @pytest.fixture
-def flask_client(event_loop, redis):
-    test_config = {'TESTING': True, 'redis': redis}
+def flask_client(event_loop, redis, db_engine):
+    test_config = {'TESTING': True, 'redis': redis, 'db': db_engine}
     app = create_flask_server(test_config=test_config)
     with app.test_client() as flask_client_obj:
         yield flask_client_obj
 
 
 @pytest.fixture
-def flask_app(event_loop, redis):
-    test_config = {'TESTING': True, 'redis': redis}
+def flask_app(event_loop, redis, db_engine):
+    test_config = {'TESTING': True, 'redis': redis, 'db': db_engine}
     app = create_flask_server(test_config=test_config)
     with app.app_context() as app_:
         yield
 
 
 @pytest.fixture
-async def websocket_server(event_loop, redis):
-    server_ = Server(redis_client=redis)
+async def websocket_server(event_loop, redis, db_engine):
+    server_ = Server(redis_client=redis, db=db_engine)
     task = server_.get_server_task(server_.router)
     server = await task
     yield server_

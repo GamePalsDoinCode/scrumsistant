@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from ..structs import UserInfo
@@ -6,16 +8,19 @@ from .app_fixtures import websocket_server
 
 @pytest.fixture
 def user(websocket_server, faker):
-    def _user(email=None, password=None, display_name=None):
+    def _user(email=None, password=None, display_name=None, is_PM=None):
         if email is None:
             email = faker.email()
         if password is None:
             password = faker.password()
         if display_name is None:
             display_name = faker.name()
-        new_user = UserInfo(pk=UserInfo.get_new_pk(websocket_server.redis), email=email, display_name=display_name)
+        if is_PM is None:
+            is_PM = random.random() > 0.5
+        new_user = UserInfo(email=email, display_name=display_name, is_PM=is_PM)
         new_user.set_password(password)
-        new_user.save_new_user(websocket_server.redis)
+        new_user.save(websocket_server.db)
+        # now we
         return new_user
 
     return _user
