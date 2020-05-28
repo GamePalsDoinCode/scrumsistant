@@ -23,8 +23,10 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 sys.path.insert(0, os.path.abspath(".."))
 from backend.db_schema import metadata  # isort:skip
+from backend.local_settings import POSTGRES_URL  # isort:skip
 
 target_metadata = metadata
+config.set_main_option('sqlalchemy.url', POSTGRES_URL)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
