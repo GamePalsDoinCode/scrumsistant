@@ -47,12 +47,24 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
 * **Local Settings**
     * Create a `backend/local_settings.py` file, and populate it like so:
     ```python
+    import os
     SERVER_NAME = 'me'
-    REDIS_URL = 'localhost'
+    
+    REDIS_HOST = os.environ.get('REDIS_URL', 'localhost')
     REDIS_PASSWORD = ''
     REDIS_PORT = 6379
     REDIS_DB = 0
+    REDIS_CONNECTION_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+    
+    POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+    POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', [INSERT YOUR PASSWORD FOR A LOCAL POSTGRES HERE, OR JUST USE '' IF ONLY RUNNING IN DOCKER])
+    POSTGRES_USER = os.environ.get('POSTGRES_USER', [INSERT YOUR USER FOR A LOCAL POSTGRES HERE, OR JUST USE '' IF ONLY RUNNING IN DOCKER])
+    POSTGRES_URL = f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/scrumsistant'
+    
+    
+    
     FLASK_SECRET_KEY = '' # GENERATE A SECRET KEY
+    
     ```
     * Generate a secret key [like so](https://stackoverflow.com/questions/34902378/where-do-i-get-a-secret-key-for-flask/34903502#34903502) and then put it in your `local_settings.py` file
 * **Make A User**
