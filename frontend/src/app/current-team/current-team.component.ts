@@ -47,7 +47,7 @@ export class CurrentTeamComponent implements OnInit, OnDestroy {
       pkToRemove = msg.userJoined[1]
       newUser = msg.userJoined
     } else if (msg.userUpdated) {
-      pkToRemove = msg.userJoined[1]
+      pkToRemove = msg.userUpdated[1]
       newUser = msg.userUpdated
     }
 
