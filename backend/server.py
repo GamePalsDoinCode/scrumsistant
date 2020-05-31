@@ -184,12 +184,12 @@ class Server:
                         LOGGER.debug(f'[authed] json loaded message: {data}')
                 except Exception as e:
                     import traceback
-
                     traceback.print_exc()
                     break
                 finally:
                     LOGGER.debug('unregistering in authed path')
                     await self.unregister(websocket)
+
 
     def get_server_task(self, func, port=8000):
         start_server = websockets.serve(func, host=self.host, port=port)
