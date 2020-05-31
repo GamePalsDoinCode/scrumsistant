@@ -24,7 +24,6 @@ LOGGER = logging.getLogger(__name__)
 
 class Server:
     def __init__(self, host=None, redis_client: RedisClient = None, db=None) -> None:
-        LOGGER.debug(f"Initializing Server")
         self.SERVER_NAME = SERVER_NAME
         self.websocket_info_dict: Dict[WEBSOCKET_TEMP_TYPE, int] = {}
         self.redis: RedisClient
@@ -43,12 +42,13 @@ class Server:
             **{"websocket-IPC": self.websocket_ipc_handler, "flask-IPC": self.flask_ipc_handler,}
         )
         self._redis_pubsub_thread = redis_pubsub_instance.run_in_thread(sleep_time=0.5,)
+        LOGGER.info(f'Initialized Server at {self.host}')
 
     async def _shutdown_helper(self, tasks: List[Task]) -> None:
         await asyncio.gather(*tasks)
 
     def shutdown_handler(self) -> None:
-        print('shutting down')
+        LOGGER.info(f'Shutting Down Server - closing {len(self.websocket_info_dict)} sockets')
         loop = asyncio.get_event_loop()
         tasks = []
         for websocket in self.websocket_info_dict:
@@ -59,22 +59,29 @@ class Server:
 
     async def register(self, websocket: WEBSOCKET_TEMP_TYPE, user: UserInfo) -> None:
         assert user.id is not None  # mostly to convince mypy that its an int at this point
+        LOGGER.info(f'Attempting to register socket for user:{user.email}')
+        existing_sockets = [ws for ws, user_id in self.websocket_info_dict.items() if user_id == user.id]
+        for sock in existing_sockets:
+            LOGGER.info(f'Removing stale socket for user:{user.email}')
+            await self.unregister(sock)
 
         self.websocket_info_dict[websocket] = user.id
-        print("registered", self.websocket_info_dict)
         self.redis.set(
             OwnsConnection(user.id), self.SERVER_NAME,
         )
         self.redis.sadd(CurrentUsers(), user.id)
-        socket_message = {
-            "type": "confirmJoined",
-            "pk": user.id,
+
+        auth_confirm_message = {
+            'channel': 'auth',
+            'message': 'authOK',
         }
-        await websocket.send(json.dumps(socket_message))
+        LOGGER.debug(f'Sending auth ok packet: {auth_confirm_message}')
+        LOGGER.info(f'Socket {id(websocket)} registered as user {user.email} (id: {user.id})')
+        await websocket.send(json.dumps(auth_confirm_message))
 
     async def unregister(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
         dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
-        print(dropped_user_pk, "socket deregistered")
+        LOGGER.info(f"Deregistering socket {id(websocket)} for user {dropped_user_pk}")
         if dropped_user_pk:
             self.redis.delete(OwnsConnection(dropped_user_pk))
             self.redis.srem(CurrentUsers(), str(dropped_user_pk))
@@ -83,7 +90,10 @@ class Server:
                 "pk": dropped_user_pk,
                 # "displayName": user_dict["display_name"],
             }
+            LOGGER.debug(f'Sending user left packet {message}')
             await self.broadcast(json.dumps(message))
+        LOGGER.debug(f'Closing socket {id(websocket)} in unregister function')
+        await websocket.close()
 
     async def broadcast(
         self, message: str, to: Iterable[WEBSOCKET_TEMP_TYPE] = None, publish_to_redis: bool = True
@@ -100,8 +110,8 @@ class Server:
             self.redis.publish(
                 "websocket-IPC", json.dumps(redis_message),
             )
-        print(to)
         if to:
+            LOGGER.debug(f'Sending broadcast packet {message} to {[id(ws) for ws in to]}')
             await asyncio.wait([socket.send(message) for socket in to])
 
     def websocket_ipc_handler(self, redis_message: Dict[str, bytes]) -> None:
