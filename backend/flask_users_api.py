@@ -11,11 +11,11 @@ bp = Blueprint('users_api', __name__)
 
 
 @bp.route('/users/<user_pk>', methods=['GET', 'POST',])
-def user_pk(user_pk) -> FLASK_RESPONSE_TYPE:
+def users(user_pk) -> FLASK_RESPONSE_TYPE:
     if request.method == 'GET':
         user_pk = request.view_args['user_pk']
         user = get_user_by_pk(user_pk, current_app.db)
-        return user.serialize(serialize_method=json.dumps)
+        return user.serialize(serialize_method=dict)
     elif request.method == 'POST':
         user = current_user
         post_data = request.get_json()
@@ -35,6 +35,6 @@ def user_pk(user_pk) -> FLASK_RESPONSE_TYPE:
             'message': json.dumps(message_for_browser),
         }
         current_app.redis_client.publish('flask-IPC', json.dumps(ipc_message))
-        return user.serialize(serialize_method=json.dumps)
+        return user.serialize(serialize_method=dict)
     else:
         return '', HTTP_STATUS_CODE.HTTP_404_NOT_FOUND.value
