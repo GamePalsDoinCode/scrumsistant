@@ -23,11 +23,7 @@ def users(user_pk) -> FLASK_RESPONSE_TYPE:
         user.display_name = display_name
         user.save(current_app.db)
 
-        message_for_browser = {
-            'type': 'userJoined',
-            'display_name': user.display_name,
-            'pk': user.id,
-        }
+        message_for_browser = {'channel': 'currentTeam', 'message': {'userUpdated': (user.display_name, user.id)}}
         ipc_message = {
             'messageType': 'userUpdated',
             'pk': user.id,

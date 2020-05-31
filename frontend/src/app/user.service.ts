@@ -1,10 +1,7 @@
 import {Injectable} from '@angular/core'
 import {HttpClient} from '@angular/common/http'
 
-export interface DisplayAndID {
-  display_name: string
-  id: number
-}
+export type DisplayAndID = [string, number]
 
 @Injectable({
   providedIn: 'root',
