@@ -20,48 +20,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private websocket: WebsocketService,
+    private userService: UserService
   ) {}
 
   async ngOnInit() {
     this.socketObserver = this.websocket.getSocketChannel(
       {},
-      msg => msg.channel === 'dashboard',
+      msg => msg.channel === 'dashboard'
     )
     this.socketSubscription = this.socketObserver.subscribe(
       serverMsg => this.handleIncoming(serverMsg),
       err => console.log('dashboard channel err', err),
       () => console.log('dashboard channel closed')
     )
-    this.authService.getUserInfo().subscribe(
-      user => this.user = user
-    )
+    this.authService.getUserInfo().subscribe(user => (this.user = user))
   }
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.socketSubscription.unsubscribe()
   }
 
-  lockName(): void {
-    this.nameLocked = true
-    this.dashboardService.userJoined(this.user).subscribe(d => console.log(d))
-    // this.socket.next({
-    //   type: 'userJoined',
-    //   name: this.user.name,
-    // })
-    // this.socket.next({
-    //   type: 'getUsernames',
-    // })
+  saveName(): void {
+    this.userService.save(this.user).subscribe()
   }
 
   handleIncoming(msg: any) {
     console.log(msg)
     if (msg.type === 'userJoined') {
-      if (msg.name !== this.user.displayName) {
+      if (msg.name !== this.user.id) {
         this.broadcastMsg = `Say hello to ${msg.name}!`
         console.log(this.broadcastMsg)
         this.usernames.push(msg.name)
       }
     } else if (msg.type === 'confirmJoined') {
-      this.user.pk = msg.pk
     } else if (msg.type === 'userLeft') {
       this.usernames = this.usernames.filter(name => name !== msg.name)
     }

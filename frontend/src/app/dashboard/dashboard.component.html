@@ -1,12 +1,15 @@
 <app-nav></app-nav>
 
 <div>
-  <div *ngIf="!nameLocked && user.pk">
+  <div>
     <label
       >Your Name:
-      <input [(ngModel)]="user.displayName" />
+      <input
+        [(ngModel)]="user.display_name"
+        [placeholder]="user.display_name ? null : 'What\'s your name, punk?'"
+      />
     </label>
-    <button (click)="lockName()">Go!</button>
+    <button (click)="saveName()">Save!</button>
   </div>
 
   <div *ngIf="nameLocked">
