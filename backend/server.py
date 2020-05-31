@@ -193,7 +193,7 @@ class Server:
         start_server = websockets.serve(func, host=self.host, port=port)
         return start_server
 
-    def run(self, loop: asyncio.AbstractEventLoop = None) -> None:
+    def run(self, loop: asyncio.AbstractEventLoop = None) -> None:  # pragma: no cover
         start_server = self.get_server_task(self.router)
         if loop is None:
             loop = asyncio.get_event_loop()
