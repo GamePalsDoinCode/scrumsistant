@@ -1,0 +1,19 @@
+<div style="width: 900px; border: 1px solid black;">
+  <div
+    style="
+      width: 20%;
+      margin: auto;
+      font-weight: 900;
+      font-size: 24px;
+      margin-top: 15px;
+    "
+  >
+    the team.
+  </div>
+  <div
+    *ngFor="let tup of currentTeam; last as isLast"
+    style="font-size: 24px; width: 20%; margin: auto; margin-top: 10px;"
+  >
+    {{ tup[0] }}<span *ngIf="!isLast">,</span><span *ngIf="isLast">.</span>
+  </div>
+</div>

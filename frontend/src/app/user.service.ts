@@ -1,6 +1,11 @@
 import {Injectable} from '@angular/core'
 import {HttpClient} from '@angular/common/http'
 
+export interface DisplayAndID {
+  display_name: string
+  id: number
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -9,5 +14,11 @@ export class UserService {
 
   save(user: Scrum.User) {
     return this.http.post<void>(`api/users/${user.id}`, user)
+  }
+
+  query(ids: number[]) {}
+
+  currentlyLoggedIn() {
+    return this.http.get<DisplayAndID[]>('api/current_users')
   }
 }
