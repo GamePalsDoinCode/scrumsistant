@@ -140,34 +140,46 @@ class Server:
             raise RedisKeyNotFoundError
         user = _load_user(user_pk.decode('utf8'), self.db)  # will raise if not found
         self.redis.delete(AuthToken(token))
+        LOGGER.info(f'Auth Verification Succeeded for {user.email}')
         return user
 
     async def router(self, websocket: WEBSOCKET_TEMP_TYPE, path: str) -> None:  # pylint: disable=unused-argument
-        if websocket not in self.websocket_info_dict:
-            init_message = json.loads(await websocket.recv())  # can throw error, will just hit the unregister
-            print(init_message)
-            if init_message.get('msg') == 'authTokenVerification':
+        LOGGER.debug(f'new connection: {id(websocket)}')
+        while not websocket.closed:
+            if websocket not in self.websocket_info_dict:
+                raw_message = await websocket.recv()
+                LOGGER.debug(f'[unauthed] raw message: {raw_message[:10]}...')
+                init_message = json.loads(raw_message)  # can throw error, will just hit the unregister
+                LOGGER.debug(f'[unauthed] json loaded message: {init_message.keys()}')
+                if init_message.get('msg') == 'authTokenVerification':
+                    try:
+                        user = self.verify_websocket_auth(init_message['data'])  # can throw error
+                        await self.register(websocket, user)
+
+                    except Exception as e:
+                        import traceback
+
+                        traceback.print_exc()
+                        LOGGER.debug('calling close: exception in unauthed')
+                        await websocket.close()
+                        break
+                elif init_message.get('multiplexChannelVerb') not in ['open', 'close']:
+                    LOGGER.debug('calling close, unrecognized message in unauthed')
+                    await websocket.close()
+            else:
                 try:
-                    user = self.verify_websocket_auth(init_message['data'])  # can throw error
-                    await self.register(websocket, user)
+                    async for message in websocket:
+                        LOGGER.debug(f'[authed] raw message: {message}')
+                        data = json.loads(message)
+                        LOGGER.debug(f'[authed] json loaded message: {data}')
                 except Exception as e:
                     import traceback
 
                     traceback.print_exc()
-                    await websocket.close()
-            else:
-                await websocket.close()
-        else:
-            try:
-                async for message in websocket:
-                    data = json.loads(message)
-                    print(data)
-                    # if data['type'] == MessageType.USER_JOINED.value:
-                    #     await handle_new_user_joined(websocket, data)
-                    # elif data['type'] == 'getUsernames':
-                    #     await handle_get_usernames(websocket)
-            finally:
-                await self.unregister(websocket)
+                    break
+                finally:
+                    LOGGER.debug('unregistering in authed path')
+                    await self.unregister(websocket)
 
     def get_server_task(self, func, port=8000):
         start_server = websockets.serve(func, host=self.host, port=port)
