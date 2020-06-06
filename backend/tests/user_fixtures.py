@@ -2,6 +2,7 @@ import random
 
 import pytest
 
+from ..redis_schema import CurrentUsers
 from ..structs import UserInfo
 from .app_fixtures import websocket_server
 
@@ -27,8 +28,8 @@ def user(websocket_server, faker):
 
 
 @pytest.fixture
-def logged_in_user(user, flask_client):
-    def _logged_in_user(email=None, password=None, display_name=None):
+def logged_in_user(user, flask_client, redis):
+    def _logged_in_user(email=None, password=None, display_name=None, add_to_redis=False):
         if not password:
             password = 'elephants-are-always-purple!##'
         new_user = user(email=email, password=password, display_name=display_name)
@@ -37,6 +38,9 @@ def logged_in_user(user, flask_client):
             'password': password,
         }
         flask_client.post('login', json=post_data)
+        if add_to_redis:
+            redis.sadd(CurrentUsers(), new_user.id)
+
         return new_user
 
     return _logged_in_user
