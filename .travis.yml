@@ -1,24 +1,42 @@
-language: python
-python:
-  - 3.8
-services:
-  - postgresql
-cache:
-  directories:
-    - $HOME/.cache/pip
-  before_cache:
-    - rm -f $HOME/.cache/pip/log/debug.log
-    - rm -rf $HOME/.cache/pip/http
-install:
-  - pip install -r backend/requirements.txt
-before_script:
-  - touch backend/local_settings.py
-  - psql -c 'create database scrumsistant;' -U postgres
-  - echo "FLASK_SECRET_KEY=b'11111111111111111111111111111111';REDIS_CONNECTION_URL='redis://:trash@trash:5555/0';POSTGRES_URL='postgres://postgres:@localhost:5432/scrumsistant';SERVER_NAME='me';" > backend/local_settings.py
-  - sed -i 's/django:.*\@/postgres:\@/' backend/alembic.ini
-  - cd backend && alembic upgrade head
-  - cd ..
-script:
-  - pytest --cov=scrumsistant backend/tests
-after_success:
-  - coveralls
+matrix:
+  include:
+    - language: python
+      python:
+        - 3.8
+      services:
+        - postgresql
+      cache:
+        directories:
+          - $HOME/.cache/pip
+        before_cache:
+          - rm -f $HOME/.cache/pip/log/debug.log
+          - rm -rf $HOME/.cache/pip/http
+      install:
+        - pip install -r backend/requirements.txt
+      before_script:
+        - touch backend/local_settings.py
+        - psql -c 'create database scrumsistant;' -U postgres
+        - echo "FLASK_SECRET_KEY=b'11111111111111111111111111111111';REDIS_CONNECTION_URL='redis://:trash@trash:5555/0';POSTGRES_URL='postgres://postgres:@localhost:5432/scrumsistant';SERVER_NAME='me';" > backend/local_settings.py
+        - sed -i 's/django:.*\@/postgres:\@/' backend/alembic.ini
+        - cd backend && alembic upgrade head
+        - cd ..
+      script:
+        - pytest --cov=scrumsistant backend/tests
+      after_success:
+        - coveralls
+    - language: node_js
+      node_js:
+        - "13.12.0"
+      addons:
+        apt:
+          sources:
+            - google-chrome
+          packages:
+            - google-chrome-stable
+      cache:
+        directories:
+          - frontend/node_modules
+        install:
+          - npm install
+        script:
+          - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
