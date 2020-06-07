@@ -28,11 +28,7 @@ matrix:
       node_js:
         - "13.12.0"
       addons:
-        apt:
-          sources:
-            - google-chrome
-          packages:
-            - google-chrome-stable
+        chrome: stable
       cache:
         directories:
           - frontend/node_modules
