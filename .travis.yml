@@ -32,6 +32,8 @@ matrix:
       cache:
         directories:
           - frontend/node_modules
+      before_install:
+        - cd frontend
       install:
         - npm install
       script:
