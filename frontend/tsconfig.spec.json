@@ -6,5 +6,5 @@
     "typeRoots": ["types/scrum-types.d.ts"]
   },
   "files": ["src/test.ts", "src/polyfills.ts"],
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts", "types/**/*.d.ts"]
 }

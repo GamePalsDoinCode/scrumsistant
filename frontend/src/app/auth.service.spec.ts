@@ -1,12 +1,15 @@
 import {TestBed} from '@angular/core/testing'
-
+import {HttpClientTestingModule} from '@angular/common/http/testing'
 import {AuthService} from './auth.service'
+import {RouterTestingModule} from '@angular/router/testing'
 
 describe('AuthService', () => {
   let service: AuthService
 
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule, RouterTestingModule],
+    })
     service = TestBed.inject(AuthService)
   })
 
