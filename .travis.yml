@@ -32,7 +32,7 @@ matrix:
       cache:
         directories:
           - frontend/node_modules
-        install:
-          - npm install
-        script:
-          - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+      install:
+        - npm install
+      script:
+        - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
