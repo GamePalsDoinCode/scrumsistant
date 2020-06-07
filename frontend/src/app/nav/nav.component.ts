@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core'
+import {Component, OnInit, Input} from '@angular/core'
 import {AuthService} from '../auth.service'
 @Component({
   selector: 'app-nav',
@@ -6,13 +6,10 @@ import {AuthService} from '../auth.service'
   styleUrls: ['./nav.component.scss'],
 })
 export class NavComponent implements OnInit {
+  @Input() showSecondaryLinks = true
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {}
-
-  logout() {
-    this.authService.logout()
-  }
 
   isPM() {
     return this.authService.queryUser('is_PM')

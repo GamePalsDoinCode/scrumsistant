@@ -8,8 +8,7 @@ export class PmCanActivateService implements CanActivate {
   constructor(private authService: AuthService) {}
 
   async canActivate(route: ActivatedRouteSnapshot) {
-    const isAuthenticated = this.authService.isAuthenticated().toPromise()
     const isPM = await this.authService.queryUser('is_PM').toPromise()
-    return isAuthenticated && !!isPM
+    return !!isPM
   }
 }

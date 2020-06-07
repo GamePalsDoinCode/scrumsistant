@@ -1,0 +1,45 @@
+$ceremonyButtonBGColor: black;
+
+div.ceremonyContainer {
+  width: 15%;
+  margin: auto;
+}
+
+.ceremonyContainer > button {
+  display: block;
+  width: 250px;
+  height: 50px;
+  margin-top: 35px;
+  background-color: $ceremonyButtonBGColor;
+  border: 1px solid $ceremonyButtonBGColor;
+
+  position: relative;
+  cursor: pointer;
+}
+
+.ceremonyContainer > button :before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  bottom: 4px;
+  right: 4px;
+  border: 2.5px solid black;
+}
+
+.ceremonyContainer > button :hover {
+  opacity: 70%;
+}
+
+.dashboardClicky {
+  text-decoration: none;
+  color: white;
+  font-family: arial;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.dashboardClicky :visited {
+  color: black;
+}
