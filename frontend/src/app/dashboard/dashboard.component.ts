@@ -13,9 +13,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   socketObserver: Observable<any>
   socketSubscription: Subscription
   user: Scrum.User
-  nameLocked = false
-  broadcastMsg = ''
-  usernames: string[] = []
   isPM = false
 
   constructor(
@@ -45,18 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.userService.save(this.user).subscribe()
   }
 
-  handleIncoming(msg: any) {
-    if (msg.type === 'userJoined') {
-      if (msg.name !== this.user.id) {
-        this.broadcastMsg = `Say hello to ${msg.name}!`
-        console.log(this.broadcastMsg)
-        this.usernames.push(msg.name)
-      }
-    } else if (msg.type === 'confirmJoined') {
-    } else if (msg.type === 'userLeft') {
-      this.usernames = this.usernames.filter(name => name !== msg.name)
-    }
-  }
+  handleIncoming(msg: any) {}
 
   logout() {
     this.authService.logout()
