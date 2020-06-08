@@ -21,6 +21,19 @@ services:
     logging:
       driver: "none"
 
+  postgres:
+    image: postgres:11.8-alpine
+    environment:
+      POSTGRES_PASSWORD: "secure_password"
+      POSTGRES_USER: "postgres_user"
+      POSTGRES_DB: "scrumsistant"
+    ports:
+      - "5433:5432" # order is host:container
+    logging:
+      driver: "none"
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
+
   flask:
     build: .
     image: flask
