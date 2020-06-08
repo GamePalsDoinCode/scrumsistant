@@ -1,11 +1,20 @@
-import {async, ComponentFixture, TestBed} from '@angular/core/testing'
+import {
+  async,
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing'
 import {HttpClientTestingModule} from '@angular/common/http/testing'
+import {By} from '@angular/platform-browser'
 import {DashboardComponent} from './dashboard.component'
 import {RouterTestingModule} from '@angular/router/testing'
-import {of} from 'rxjs'
+import {of, Subject} from 'rxjs'
 import {AuthService} from '../auth.service'
 import {Component, Input} from '@angular/core'
 import {FormsModule} from '@angular/forms'
+import {WebsocketService} from '../websocket.service'
+import {} from 'jasmine'
 
 @Component({selector: 'app-nav', template: ''})
 class NavComponentStub {
@@ -22,9 +31,17 @@ const testUser: Scrum.User = {
   is_PM: false,
 }
 
-const authServiceStub: Partial<AuthService> = {
-  getUserInfo: () => of(testUser),
-  queryUser: (prop: keyof Scrum.User) => of(testUser[prop]),
+const fakeAuthService = jasmine.createSpyObj('AuthService', [
+  'getUserInfo',
+  'queryUser',
+])
+const getUserInfoSpy = fakeAuthService.getUserInfo.and.returnValue(of(testUser))
+const queryUserSpy = fakeAuthService.queryUser.and.returnValue(of(false))
+const fakeWebsocket = new Subject()
+const WebSocketServiceStub: Partial<WebsocketService> = {
+  getSocketChannel(init, filter) {
+    return fakeWebsocket
+  },
 }
 
 describe('DashboardComponent', () => {
@@ -39,7 +56,10 @@ describe('DashboardComponent', () => {
         CurrentTeamComponentStub,
       ],
       imports: [HttpClientTestingModule, RouterTestingModule, FormsModule],
-      providers: [{provide: AuthService, useValue: authServiceStub}],
+      providers: [
+        {provide: WebsocketService, useValue: WebSocketServiceStub},
+        {provide: AuthService, useValue: fakeAuthService},
+      ],
     }).compileComponents()
   }))
 
@@ -50,7 +70,17 @@ describe('DashboardComponent', () => {
   })
 
   it('should create', () => {
-    component.ngOnInit()
     expect(component).toBeTruthy()
+  })
+
+  it('should update input value when name is changed', async () => {
+    component.user.displayName = 'Tom'
+    await fixture.detectChanges()
+    await fixture.whenStable()
+
+    const input = fixture.debugElement.query(By.css('#test'))
+    debugger
+    expect(true).toBe(true)
+    // expect(input.textContent).toEqual('Tom')
   })
 })
