@@ -4,7 +4,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - "6379:6379"
+      - "6378:6379"
     volumes:
       - ./scrumsistant/docker/redis.config:/usr/local/etc/redis/redis.conf
     logging:
@@ -20,6 +20,8 @@ services:
       - "5433:5432" # order is host:container
     logging:
       driver: "none"
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
 
   flask:
     build: .
