@@ -42,7 +42,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.userService.save(this.user).subscribe()
   }
 
-  handleIncoming(msg: any) {}
+  handleIncoming(msg: any) {
+    console.log(msg)
+  }
 
   logout() {
     this.authService.logout()
