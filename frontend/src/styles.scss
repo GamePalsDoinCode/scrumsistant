@@ -24,6 +24,45 @@ $c-primary-b: $c-white;
 $c-secondary-a: $c-sunflower;
 $c-secondary-b: $c-surf;
 
+
+/**
+ * Layout / Grid
+ *
+ * The way I've designed this, I don't think we need a very sophisticated grid
+ * system. CSS Grid, flexbox, and some responsive widths should be plenty.
+ */
+
+$gutter: 30px;
+.container{
+  margin: 0px auto;
+  max-width: 595px;
+  .grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr [col-start]);
+    grid-gap: $gutter;
+    padding: 0px $gutter;
+    width: 100%;
+
+    .grid__item{
+      &--one-whole{
+        grid-column: span 4;
+      }
+
+      &--three-quarters{
+        grid-column: span 3;
+      }
+
+      &--one-half{
+        grid-column: span 2;
+      }
+
+      &--one-quarter{
+        grid-column: span 1;
+      }
+    }
+  }
+}
+
 /*============= 
 Components 
 =============*/
