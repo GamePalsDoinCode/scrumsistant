@@ -1,15 +1,19 @@
 <div style="margin-top: 15px;">
-  <div style="width: 85%; margin: auto;">
+  <div style="width: 27%; margin: auto;">
     <img style="width: 500px; margin: auto;" src="../../assets/logo_v1.png" />
   </div>
-  <div>
-    <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
-      <span style="width: 120px; display: inline-block;">Email Address</span>
+  <div style="margin-top: 30px;">
+    <div class="welcome-text">
+      welcome.
+    </div>
+    <div style="width: 15%; margin: auto;">
+      <!-- <span style="width: 120px; display: inline-block;">Email Address</span> -->
       <input
         [(ngModel)]="potentialUser.email"
-        placeholder="you@example.com"
+        placeholder="username..."
         type="email"
-        style="width: 200px;"
+        style="margin-top: 25px;"
+        class="login-input"
         email="true"
         [ngModelOptions]="{updateOn: 'blur'}"
         #prmEmail="ngModel"
@@ -18,23 +22,26 @@
         >That's a bad email, darling, and I think you can do better ;)</span
       >
     </div>
-    <div style="margin-bottom: 15px; margin-left: 15px; margin-top: 15px;">
-      <span style="width: 120px; display: inline-block;">Password</span>
+    <div style="width: 15%; margin: auto;">
+      <!-- <span style="width: 120px; display: inline-block;">Password</span> -->
       <input
         [(ngModel)]="potentialUser.password"
+        placeholder="password..."
         type="password"
-        style="width: 200px;"
+        style="margin-top: 45px;"
+        class="login-input"
       />
     </div>
-    <div>
+    <div style="width: 15%; margin: auto;">
       <button
         [disabled]="
           prmEmail.errors?.email || this.potentialUser.password.length == 0
         "
         (click)="submitLogin()"
-        style="width: 200px; margin-left: 135px;"
+        class="login-button"
+        style="margin-top: 45px;"
       >
-        Lemme Scrum!
+        {{ this.buttonText }}
       </button>
     </div>
   </div>

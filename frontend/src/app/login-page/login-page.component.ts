@@ -12,12 +12,14 @@ export class LoginPageComponent implements OnInit {
     password: '',
   }
 
+  buttonText = 'login'
+
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {}
 
   submitLogin() {
-    console.log(this.potentialUser)
+    this.buttonText = 'wait...'
     this.authService.checkCredentials(this.potentialUser)
   }
 }
