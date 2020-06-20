@@ -43,7 +43,6 @@ export class AuthService implements CanActivate {
     redirectTo: string | null = null
   ) {
     this.errorMessage = ''
-
     this.submitCreds(user.email, user.password).subscribe(
       successResponse => {
         this.user = successResponse.user
