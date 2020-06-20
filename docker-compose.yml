@@ -22,11 +22,16 @@ services:
       driver: "none"
     volumes:
       - ./docker/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   flask:
     build: .
     image: flask
-    command: bash -c "./wait-for-it.sh postgres:5432 && cd backend && alembic upgrade head && flask run --host 0.0.0.0"
+    command: bash -c "cd backend && alembic upgrade head && flask run --host 0.0.0.0"
     ports:
       - "5000:5000"
     volumes:
@@ -35,6 +40,7 @@ services:
     depends_on:
       - redis
       - postgres
+    restart: on-failure
     links:
       - redis
       - postgres
