@@ -13,6 +13,7 @@ export class LoginPageComponent implements OnInit {
   }
 
   buttonText = 'login'
+  buttonThinking = false
 
   constructor(private authService: AuthService) {}
 
@@ -20,6 +21,11 @@ export class LoginPageComponent implements OnInit {
 
   submitLogin() {
     this.buttonText = 'wait...'
-    this.authService.checkCredentials(this.potentialUser)
+    this.buttonThinking = true
+    const credsOk = this.authService.checkCredentials(this.potentialUser)
+    if (!credsOk) {
+      this.buttonText = 'login'
+      this.buttonThinking = false
+    }
   }
 }

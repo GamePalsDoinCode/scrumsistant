@@ -38,10 +38,14 @@
           prmEmail.errors?.email || this.potentialUser.password.length == 0
         "
         (click)="submitLogin()"
-        class="login-button"
         style="margin-top: 45px;"
+        class="login-button-base"
+        [ngClass]="{
+          'login-button-thinking': buttonThinking,
+          'login-button': !buttonThinking
+        }"
       >
-        {{ this.buttonText }}
+        {{ buttonText }}
       </button>
     </div>
   </div>

@@ -20,7 +20,7 @@ $active-color: #9dd098;
   padding-left: 10px;
 }
 
-.login-button {
+.login-button-base {
   width: 300px;
   height: 50px;
 
@@ -31,7 +31,7 @@ $active-color: #9dd098;
   border: none;
 }
 
-.login-button:before {
+.login-button-base:before {
   content: '';
   display: block;
   position: absolute;
@@ -41,30 +41,38 @@ $active-color: #9dd098;
   right: 4px;
 }
 
-.login-button:disabled {
-  background-color: $disabled-color;
-  color: white;
-}
-.login-button:enabled {
-  background-color: $enabled-color;
-  color: white;
-  cursor: pointer;
-  border: none;
+.login-button {
+  &:disabled {
+    background-color: $disabled-color;
+    color: white;
+  }
+  &:disabled:before {
+    border: 2.5px solid $disabled-color;
+  }
+  &:enabled {
+    background-color: $enabled-color;
+    color: white;
+    cursor: pointer;
+    border: none;
+  }
+  &:enabled:before {
+    border: 2.5px solid $enabled-color;
+  }
+  &:active {
+    background-color: $active-color;
+    color: white;
+    border: none;
+  }
+  &:active:before {
+    border: 2.5px solid $active-color;
+  }
 }
 
-.login-button:disabled:before {
-  border: 2.5px solid $disabled-color;
-}
-
-.login-button:enabled:before {
-  border: 2.5px solid $enabled-color;
-}
-
-.login-button:active {
+.login-button-thinking {
   background-color: $active-color;
   color: white;
   border: none;
 }
-.login-button:active:before {
+.login-button-thinking:before {
   border: 2.5px solid $active-color;
 }
