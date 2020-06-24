@@ -2,15 +2,17 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import dictionaries, text
 
-from ..exceptions import RedisKeyNotFoundError
+from ..exceptions import UserNotFound
 from ..flask_utils import _load_user, load_user
-from ..redis_schema import Users
 from ..utils import cleanup_redis_dict, transform_to_redis_safe_dict
 from .app_fixtures import *
 from .user_fixtures import *
 
 
 @given(dictionaries(text(min_size=1), text(min_size=1), min_size=1))
+@pytest.mark.filterwarnings(
+    'ignore:.*'
+)  # this test warns that the fixture is not reset each test run and recommends using a context manager, which we do. so i want to disable just that warning, but the regex filtering any more specific than that isnt working TODO
 def test_redis_round_trip(redis, test_dict):
     # procedure -
     # - generate random dict
@@ -23,24 +25,24 @@ def test_redis_round_trip(redis, test_dict):
     # so this is not a full test of the transform function
 
     redis_safe_dict = transform_to_redis_safe_dict(test_dict)
-    redis.hmset('key', redis_safe_dict)
-    redised_dict = redis.hgetall('key')
-    normal_dict = cleanup_redis_dict(redised_dict)
-    assert normal_dict == test_dict
-    redis.delete('key')  # this is because fixtures are not reset between hypothesis runs
+    with hypothesis_safe_redis(redis) as redis:
+        redis.hmset('key', redis_safe_dict)
+        redised_dict = redis.hgetall('key')
+        normal_dict = cleanup_redis_dict(redised_dict)
+        assert normal_dict == test_dict
 
 
-def test__load_user_loads_correct_user(redis, user):
+def test__load_user_loads_correct_user(db_engine, user):
     # objects compare on identity so would fail
     # so we will compare serialized versions
     new_user = user()
-    loaded_user = _load_user(Users(new_user.pk), redis)
+    loaded_user = _load_user(str(new_user.id), db_engine)
     assert new_user.serialize() == loaded_user.serialize()
 
 
-def test__load_user_throws_exception_when_user_not_found(redis):
-    with pytest.raises(RedisKeyNotFoundError):
-        _load_user(Users(1), redis)
+def test__load_user_throws_exception_when_user_not_found(db_engine):
+    with pytest.raises(UserNotFound):
+        _load_user(str(1), db_engine)
 
 
 def test_load_user_returns_none_when_user_not_found(flask_app):

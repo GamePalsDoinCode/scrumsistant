@@ -1,0 +1,8 @@
+FROM python:3.8.2
+ENV PYTHONBUFFERED 1
+
+WORKDIR /scrumsistant
+RUN apt-get update && apt-get -y upgrade
+COPY ./backend /scrumsistant/backend/
+RUN pip install -r /scrumsistant/backend/requirements.txt
+RUN mkdir -p /var/log/scrumsistant && touch /var/log/scrumsistant/scrum.log
