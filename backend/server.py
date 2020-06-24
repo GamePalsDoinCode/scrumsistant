@@ -78,6 +78,8 @@ class Server:
         LOGGER.debug(f'Sending auth ok packet: {auth_confirm_message}')
         LOGGER.info(f'Socket {id(websocket)} registered as user {user.email} (id: {user.id})')
         await websocket.send(json.dumps(auth_confirm_message))
+        new_user_message = {'channel': 'currentTeam', 'message': {'userJoined': (user.display_name, user.id),}}
+        await self.broadcast(json.dumps(new_user_message), to=self.websocket_info_dict.keys() - {websocket})
 
     async def unregister(self, websocket: WEBSOCKET_TEMP_TYPE) -> None:
         dropped_user_pk = self.websocket_info_dict.pop(websocket, None)
@@ -85,11 +87,7 @@ class Server:
         if dropped_user_pk:
             self.redis.delete(OwnsConnection(dropped_user_pk))
             self.redis.srem(CurrentUsers(), str(dropped_user_pk))
-            message = {
-                "type": "userLeft",
-                "pk": dropped_user_pk,
-                # "displayName": user_dict["display_name"],
-            }
+            message = {"channel": "currentTeam", 'message': {'userLeft': dropped_user_pk}}
             LOGGER.debug(f'Sending user left packet {message}')
             await self.broadcast(json.dumps(message))
         LOGGER.debug(f'Closing socket {id(websocket)} in unregister function')
@@ -195,7 +193,7 @@ class Server:
         start_server = websockets.serve(func, host=self.host, port=port)
         return start_server
 
-    def run(self, loop: asyncio.AbstractEventLoop = None) -> None:
+    def run(self, loop: asyncio.AbstractEventLoop = None) -> None:  # pragma: no cover
         start_server = self.get_server_task(self.router)
         if loop is None:
             loop = asyncio.get_event_loop()

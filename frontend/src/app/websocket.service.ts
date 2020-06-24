@@ -2,7 +2,7 @@ import {Injectable, OnDestroy} from '@angular/core'
 import {HttpClient} from '@angular/common/http'
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket'
 import {BehaviorSubject, of, Subscription, Observable} from 'rxjs'
-import {switchMap} from 'rxjs/operators'
+import {switchMap, filter} from 'rxjs/operators'
 
 interface WebsocketAuthObj {
   signedToken: string
@@ -85,7 +85,8 @@ export class WebsocketService implements OnDestroy {
         connOK
           ? this.multiplexHelper(initialMessage, {}, filterFunc)
           : of(false)
-      )
+      ),
+      filter(val => !!val)
     )
   }
 }
