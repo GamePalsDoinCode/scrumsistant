@@ -11,20 +11,8 @@ def OwnsConnection(template_val: RedisKeyAllowedInput) -> RedisKey:
     return _table_base('owns-connection:{}', template_val)
 
 
-def PKByEmail(template_val: RedisKeyAllowedInput) -> RedisKey:
-    return _table_base('email:{}', template_val)
-
-
-def Users(template_val: RedisKeyAllowedInput) -> RedisKey:
-    return _table_base('user:{}', template_val)
-
-
 def CurrentUsers() -> RedisKey:
     return _table_base('currentUserPks', '')
-
-
-def CurrentPKTable() -> RedisKey:
-    return _table_base('WEBSOCKET_PK', '')
 
 
 def AuthToken(token: bytes) -> RedisKey:

@@ -1,5 +1,7 @@
 from typing import Any, Dict, NewType, Tuple, Union
 
+from typing_extensions import TypedDict
+
 RedisKey = NewType('RedisKey', str)
 RedisKeyAllowedInput = Union[str, int, bytes]
 
@@ -16,6 +18,7 @@ FLASK_RESPONSE_TYPE = Union[FLASK_ROUTE_RESPONSE_VAL, Tuple[FLASK_ROUTE_RESPONSE
 WEBSOCKET_TEMP_TYPE = Any
 REDIS_PUBSUB_TEMP_TYPE = Any
 REDIS_PIPELINE_TEMP_TYPE = Any
+DB_CONN = Any
 
 
 class RedisClient:
@@ -62,3 +65,6 @@ class RedisClient:
 
     def incr(self, key: RedisKey) -> REDIS_SCALAR_OUTPUT:
         ...
+
+
+AuthInfoPacket = TypedDict('AuthInfoPacket', {'signedToken': bytes, 'verifyKey': str})
