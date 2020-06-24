@@ -46,7 +46,7 @@ describe('AuthService', () => {
   })
 
   it('should return the authed user when creds are right', () => {
-    ;(service as any)
+    (service as any)
       .submitCreds('rightemail@email.com', 'goodPassword')
       .subscribe((ret: {user: Scrum.User; auth: string}) => {
         expect(ret.user).toEqual(testUser)

@@ -14,4 +14,8 @@ export class NavComponent implements OnInit {
   isPM() {
     return this.authService.queryUser('is_PM')
   }
+
+  isPM() {
+    return this.authService.queryUser('is_PM')
+  }
 }
