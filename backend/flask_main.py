@@ -43,9 +43,11 @@ def create_app(test_config=None):
 
     from .flask_auth import bp as auth_bp
     from .flask_current_users_api import bp as cur_users_api_bp
+    from .flask_users_api import bp as users_api_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(cur_users_api_bp)
+    app.register_blueprint(users_api_bp)
     app.before_request(login_required_by_default)
     return app
 

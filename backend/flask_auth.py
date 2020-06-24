@@ -36,8 +36,7 @@ def login() -> FLASK_RESPONSE_TYPE:
     password_ok = user.check_password(incoming_password)
     if password_ok:
         login_user(user)
-        session.permanent = True
-        return {'auth': 'ok'}
+        return {'auth': 'ok', 'user': user.serialize(serialize_method=dict, skip_list=['password'])}
     return not_allowed_return_val
 
 

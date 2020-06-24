@@ -35,7 +35,7 @@ def flask_app(event_loop, redis, db_engine):
     test_config = {'TESTING': True, 'redis': redis, 'db': db_engine}
     app = create_flask_server(test_config=test_config)
     with app.app_context() as app_:
-        yield
+        yield app_
 
 
 @pytest.fixture

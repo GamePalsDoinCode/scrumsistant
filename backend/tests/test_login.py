@@ -1,5 +1,6 @@
 import pytest
 
+from ..redis_schema import CurrentUsers
 from .app_fixtures import *  # star import because pytest is moronic and if you use a fixture that itself uses a 2nd fixture, you have to import the 2nd fixture here too.  So fuck it just give me all of em
 from .user_fixtures import *
 
@@ -63,3 +64,13 @@ def test_login_required_by_default_decorator_works(logged_in_user, flask_client)
     logged_in_user()
     rv = flask_client.get('current_users')
     assert rv.status_code != 401
+
+
+def test_redis_current_users_is_filled_out_when_logging_in(logged_in_user, user, redis):
+    logged_in = logged_in_user(add_to_redis=True)
+    not_logged_in = user()
+
+    redis_current_user_ids = {int(pk) for pk in redis.smembers(CurrentUsers())}
+
+    assert logged_in.id in redis_current_user_ids
+    assert not_logged_in.id not in redis_current_user_ids
