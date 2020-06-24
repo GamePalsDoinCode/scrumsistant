@@ -37,6 +37,7 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
         * [virtualenv](https://virtualenv.pypa.io/en/latest/).  It has a list of wrappers for itself at the bottom, w/e works for you
         * [in home dir] `virtualenv scrumenv -p python3.8` [assumes python3.8 is installed and on PATH]
         * `source scrumenv/bin/activate` [on windows there should be an activate.bat somewhere approximately there that you have to run]
+        * protip - my alias is `scrum='source /home/danny/scrum/bin/activate && cd /home/danny/scrumsistant'`
     * **Mike:** 
         * I [configure Pycharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html#) to handle this crap for me using `venv`.
 * **Backend Python Package Dependencies**
@@ -48,16 +49,32 @@ The backend uses python and redis. [See here](#backend-1) for instructions on ho
     * [Install redis](https://redis.io/topics/quickstart) and, if you're feeling fancy, make it a ["proper service"](https://gist.github.com/hackedunit/a53f0b5376b3772d278078f686b04d38).
         * **Windows note:** I executed the installation commands from the first link in WSL, but now I can only run redis in Ubuntu. This is fine for me but perhaps you would like to find a better solution. Please do! 
     * Start the redis server locally
+* **Postgres And Migrations**
+   * Figure out how to install postgres on your system
+   * Make a db and configure the postgres related local settings as shown below
+   * From `backend` run `alembic upgrade head` - this will run the existing migrations
+   * To make a new migration, make changes to the db_schema.py file and run `alembic revision --autogenerate -m 'message about the change'`.  Then examine the generated file (the command will print out where it is), and if good, commit it.  Be sure to then run the upgrade command to apply it!
 * **Local Settings**
     * Create a `backend/local_settings.py` file, and populate it like so:
     ```python
     import os
     SERVER_NAME = 'me'
-    REDIS_URL = os.environ.get('REDIS_URL','localhost')
+   
+    REDIS_HOST = os.environ.get('REDIS_URL', 'localhost')
     REDIS_PASSWORD = ''
     REDIS_PORT = 6379
     REDIS_DB = 0
+    REDIS_CONNECTION_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+    
+    POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+    POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', [INSERT YOUR PASSWORD FOR A LOCAL POSTGRES HERE, OR JUST USE '' IF ONLY RUNNING IN DOCKER])
+    POSTGRES_USER = os.environ.get('POSTGRES_USER', [INSERT YOUR USER FOR A LOCAL POSTGRES HERE, OR JUST USE '' IF ONLY RUNNING IN DOCKER])
+    POSTGRES_URL = f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/scrumsistant'
+    
+    
+    
     FLASK_SECRET_KEY = '' # GENERATE A SECRET KEY
+    
     ```
     * Generate a secret key [like so](https://stackoverflow.com/questions/34902378/where-do-i-get-a-secret-key-for-flask/34903502#34903502) and then put it in your `local_settings.py` file
 * **Make A User**

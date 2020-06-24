@@ -8,9 +8,12 @@ omit =
 	**/tests/*
 	**/scrum_types.py
 	**/handler_funcs.py
+	**/migrations**
 [report]
 fail_under = 70
 precision = 2
 skip_covered = True
 sort = Miss
-
+exclude_lines =
+	pragma: no cover
+	LOGGER.
