@@ -3,7 +3,8 @@ from unittest import mock
 
 import pytest
 
-from ..redis_schema import CurrentUsers, OwnsConnection, Users
+from ..db_schema import Users
+from ..redis_schema import CurrentUsers, OwnsConnection
 from .app_fixtures import *
 from .user_fixtures import *
 
@@ -11,9 +12,9 @@ from .user_fixtures import *
 async def test_register(user, websocket_server, websocket_client):
     u = user()
     await websocket_server.register(websocket_client, u)
-    assert websocket_server.websocket_info_dict[websocket_client] == u.pk
-    assert websocket_server.redis.get(OwnsConnection(u.pk)).decode('utf8') == websocket_server.SERVER_NAME
-    assert websocket_server.redis.sismember(CurrentUsers(), u.pk)
+    assert websocket_server.websocket_info_dict[websocket_client] == u.id
+    assert websocket_server.redis.get(OwnsConnection(u.id)).decode('utf8') == websocket_server.SERVER_NAME
+    assert websocket_server.redis.sismember(CurrentUsers(), u.id)
 
 
 async def test_unregister_of_nonregistered_user(websocket_server, websocket_client):
@@ -27,8 +28,8 @@ async def test_unregister_of_registered_user(user, websocket_server, websocket_c
     u = user()
     await websocket_server.register(websocket_client, u)
     await websocket_server.unregister(websocket_client)
-    assert not websocket_server.redis.get(OwnsConnection(u.pk))
-    assert not websocket_server.redis.sismember(CurrentUsers(), u.pk)
+    assert not websocket_server.redis.get(OwnsConnection(u.id))
+    assert not websocket_server.redis.sismember(CurrentUsers(), u.id)
 
 
 async def test_verify_websocket_auth_happy_path(websocket_server, websocket_client, flask_client, logged_in_user):
@@ -62,12 +63,13 @@ async def test_verify_websocket_auth_with_false_data_fails(websocket_server, web
 
 
 async def test_verify_good_auth_but_user_deleted_fails(
-    websocket_server, websocket_client, flask_client, logged_in_user
+    websocket_server, websocket_client, db_engine, flask_client, logged_in_user
 ):
     u = logged_in_user()
     auth_info = flask_client.get('get_websocket_auth_token')
     message = {'msg': 'authTokenVerification', 'data': auth_info.json}
-    websocket_server.redis.delete(Users(u.pk))
+    query = Users.delete().where(Users.c.id == u.id)
+    db_engine.execute(query)
     await websocket_client.send(json.dumps(message))
     with pytest.raises(websockets.exceptions.ConnectionClosedOK):
         await websocket_client.recv()

@@ -5,9 +5,10 @@ from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_redis import FlaskRedis
+from sqlalchemy import create_engine
 
 from .flask_utils import load_user, login_required_by_default
-from .local_settings import FLASK_SECRET_KEY, REDIS_CONNECTION_URL
+from .local_settings import FLASK_SECRET_KEY, POSTGRES_URL, REDIS_CONNECTION_URL
 from .scrum_types import RedisClient
 from .structs import AnonymousUserWrapper
 
@@ -25,12 +26,15 @@ def create_app(test_config=None):
 
     if test_config:
         redis_client: RedisClient = test_config['redis']
+        db = test_config['db']
         app.config.update(test_config)
     else:
         app.config['REDIS_URL'] = REDIS_CONNECTION_URL
         redis_client: RedisClient = FlaskRedis(app)
+        db = create_engine(POSTGRES_URL)
 
     app.redis_client: RedisClient = redis_client
+    app.db = db
     login_service = LoginManager(app)
     app.login_service = login_service
     login_service.anonymous_user = AnonymousUserWrapper
@@ -39,9 +43,11 @@ def create_app(test_config=None):
 
     from .flask_auth import bp as auth_bp
     from .flask_current_users_api import bp as cur_users_api_bp
+    from .flask_users_api import bp as users_api_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(cur_users_api_bp)
+    app.register_blueprint(users_api_bp)
     app.before_request(login_required_by_default)
     return app
 

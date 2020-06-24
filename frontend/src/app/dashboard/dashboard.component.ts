@@ -1,76 +1,57 @@
-import {Component, OnInit} from '@angular/core'
-import {webSocket, WebSocketSubject} from 'rxjs/webSocket'
+import {Component, OnInit, OnDestroy} from '@angular/core'
 import {delay} from 'rxjs/operators'
-import {DashboardService} from '../dashboard.service'
+import {UserService} from '../user.service'
+import {WebsocketService} from '../websocket.service'
+import {Subscription, Observable} from 'rxjs'
 import {AuthService} from '../auth.service'
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent implements OnInit {
-  socket: WebSocketSubject<any> | null = null
-  user: Scrum.User = {
-    displayName: 'Punk',
-    pk: null,
-    email: '',
-    is_PM: false,
-  }
+export class DashboardComponent implements OnInit, OnDestroy {
+  socketObserver: Observable<any>
+  socketSubscription: Subscription
+  user: Scrum.User
   nameLocked = false
   broadcastMsg = ''
   usernames: string[] = []
 
   constructor(
-    private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private websocket: WebsocketService,
+    private userService: UserService
   ) {}
 
-  ngOnInit(): void {
-    this.authService.requestWebsocketAuthToken().subscribe(authObj => {
-      this.socket = webSocket('ws://localhost:8000')
-      this.socket.subscribe(
-        serverMsg => this.handleIncoming(serverMsg),
-        err => console.log(err),
-        () => console.log('hey there! conn closed')
-      )
-      const message = {
-        msg: 'authTokenVerification',
-        data: authObj,
-      }
-      this.socket.next(message)
-    })
-    // this.dashboardService.getCurrentUserNames().subscribe(usernames => {
-    //   console.log(usernames)
-    //   console.log(usernames.filter(name => name !== 'Uninitialized'))
-    //   this.usernames = this.usernames.concat(
-    //     usernames.filter(name => name !== 'Uninitialized')
-    //   )
-    //   console.log(this.usernames)
-    // })
+  async ngOnInit() {
+    this.socketObserver = this.websocket.getSocketChannel(
+      {},
+      msg => msg.channel === 'dashboard'
+    )
+    this.socketSubscription = this.socketObserver.subscribe(
+      serverMsg => this.handleIncoming(serverMsg),
+      err => console.log('dashboard channel err', err),
+      () => console.log('dashboard channel closed')
+    )
+    this.authService.getUserInfo().subscribe(user => (this.user = user))
+  }
+  ngOnDestroy() {
+    this.socketSubscription.unsubscribe()
   }
 
-  lockName(): void {
-    this.nameLocked = true
-    this.dashboardService.userJoined(this.user).subscribe(d => console.log(d))
-    // this.socket.next({
-    //   type: 'userJoined',
-    //   name: this.user.name,
-    // })
-    // this.socket.next({
-    //   type: 'getUsernames',
-    // })
+  saveName(): void {
+    this.userService.save(this.user).subscribe()
   }
 
   handleIncoming(msg: any) {
     console.log(msg)
     if (msg.type === 'userJoined') {
-      if (msg.name !== this.user.displayName) {
+      if (msg.name !== this.user.id) {
         this.broadcastMsg = `Say hello to ${msg.name}!`
         console.log(this.broadcastMsg)
         this.usernames.push(msg.name)
       }
     } else if (msg.type === 'confirmJoined') {
-      this.user.pk = msg.pk
     } else if (msg.type === 'userLeft') {
       this.usernames = this.usernames.filter(name => name !== msg.name)
     }
