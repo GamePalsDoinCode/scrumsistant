@@ -6,11 +6,10 @@ import {of, Observable} from 'rxjs'
 import {WebsocketService} from './websocket.service'
 
 type valueof<T> = T[keyof T]
-interface LoginReturnType{
-  user: Scrum.User;
-  auth: string;
+interface LoginReturnType {
+  user: Scrum.User
+  auth: string
 }
-
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +18,11 @@ export class AuthService implements CanActivate {
   errorMessage = ''
   user: Scrum.User
 
-  constructor(private http: HttpClient, private router: Router, private websocket: WebsocketService) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private websocket: WebsocketService
+  ) {}
 
   isAuthenticated() {
     // TODO: is this a bad idea to hit the backend on any route change?  Let's say no!
@@ -28,21 +31,26 @@ export class AuthService implements CanActivate {
       .pipe(tap(user => (this.user = user)))
   }
 
-
-  private clearUser(){
+  private clearUser() {
     this.user = {email: '', pk: null, displayName: '', is_PM: false}
+  }
+
+  private submitCreds(email: string, password: string) {
+    return this.http.post<LoginReturnType>('/api/login', {email, password})
   }
   checkCredentials(
     user: {email: string; password: string},
     redirectTo: string | null = null
   ) {
     this.errorMessage = ''
-    this.http.post<LoginReturnType>('/api/login', {...user}).subscribe(
+    this.submitCreds(user.email, user.password).subscribe(
       successResponse => {
         this.user = successResponse.user
         this.websocket.openConnection().subscribe(connOk => {
-          if (connOk !== false){
-            const redirectDefault = this.user.is_PM ? '/pm_tools' : '/app/dashboard'
+          if (connOk !== false) {
+            const redirectDefault = this.user.is_PM
+              ? '/pm_tools'
+              : '/app/dashboard'
             this.router.navigate([redirectTo || redirectDefault])
           } else {
             this.errorMessage = 'Unknown Error: Please Try Again'
@@ -66,17 +74,19 @@ export class AuthService implements CanActivate {
     )
   }
 
-  private getUserHelper(propertyFunc: (user: Scrum.User) => valueof<Scrum.User> | Scrum.User ) {
+  private getUserHelper(
+    propertyFunc: (user: Scrum.User) => valueof<Scrum.User> | Scrum.User
+  ) {
     const propertyOf /*get it?!*/ = (user: Scrum.User) => of(propertyFunc(user))
-    return this.user === null ?
-      this.isAuthenticated().pipe(
-        switchMap(() => propertyOf(this.user))
-      ) :
-      propertyOf(this.user)
+    return this.user === null
+      ? this.isAuthenticated().pipe(switchMap(() => propertyOf(this.user)))
+      : propertyOf(this.user)
   }
 
   queryUser(property: keyof Scrum.User) {
-    return this.getUserHelper(user => user[property]) as Observable<valueof<Scrum.User>>
+    return this.getUserHelper(user => user[property]) as Observable<
+      valueof<Scrum.User>
+    >
   }
 
   getUserInfo() {

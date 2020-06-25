@@ -13,9 +13,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   socketObserver: Observable<any>
   socketSubscription: Subscription
   user: Scrum.User
-  nameLocked = false
-  broadcastMsg = ''
-  usernames: string[] = []
+  isPM = false
 
   constructor(
     private authService: AuthService,
@@ -34,6 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       () => console.log('dashboard channel closed')
     )
     this.authService.getUserInfo().subscribe(user => (this.user = user))
+    this.isPM = !!(await this.authService.queryUser('is_PM').toPromise())
   }
   ngOnDestroy() {
     this.socketSubscription.unsubscribe()
@@ -45,15 +44,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   handleIncoming(msg: any) {
     console.log(msg)
-    if (msg.type === 'userJoined') {
-      if (msg.name !== this.user.id) {
-        this.broadcastMsg = `Say hello to ${msg.name}!`
-        console.log(this.broadcastMsg)
-        this.usernames.push(msg.name)
-      }
-    } else if (msg.type === 'confirmJoined') {
-    } else if (msg.type === 'userLeft') {
-      this.usernames = this.usernames.filter(name => name !== msg.name)
-    }
+  }
+
+  logout() {
+    this.authService.logout()
   }
 }

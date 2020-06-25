@@ -1,6 +1,31 @@
-<app-nav></app-nav>
+<app-nav [showSecondaryLinks]="false"></app-nav>
 
-<div>
+<div style="margin-top: 40px; margin-bottom: 10px;">
+  <div style="text-align: center;">
+    choose ceremony.
+  </div>
+  <div class="ceremonyContainer" style="margin-bottom: 30px;">
+    <button routerLink="/app/standup">
+      <span class="dashboardClicky">daily</span>
+    </button>
+    <button routerLink="/app/pointing">
+      <span class="dashboardClicky">planning</span>
+    </button>
+    <button routerLink="/app/retro">
+      <span class="dashboardClicky">retro</span>
+    </button>
+    <button *ngIf="isPM" routerLink="/pm_tools">
+      <span class="dashboardClicky">pmConfig</span>
+    </button>
+    <button (click)="logout()">
+      <span class="dashboardClicky">logout</span>
+    </button>
+  </div>
+
+  <div style="display: flex; justify-content: center;">
+    <app-current-team></app-current-team>
+  </div>
+
   <div>
     <label
       >Your Name:
@@ -9,11 +34,7 @@
         [placeholder]="user.display_name ? null : 'What\'s your name, punk?'"
       />
     </label>
-    <button (click)="saveName()">Save!</button>
-  </div>
-
-  <div *ngIf="nameLocked">
-    <div>Your Name: {{ user.displayName }}</div>
+    <button (click)="saveName()" id="saveButton">Save!</button>
   </div>
   <app-current-team></app-current-team>
 </div>

@@ -34,7 +34,9 @@ export class CurrentTeamComponent implements OnInit, OnDestroy {
       )
   }
   ngOnDestroy() {
-    this.socketSubscription.unsubscribe()
+    if (this.socketSubscription) {
+      this.socketSubscription.unsubscribe()
+    }
   }
 
   private handleMessage(msg: any) {
