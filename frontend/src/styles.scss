@@ -2,7 +2,7 @@
  Global Styles
  =============*/
 
-/**
+/*
  * Color
  *
  * The abstracted vars should be used for color declarations, not the color
@@ -25,7 +25,7 @@ $c-secondary-a: $c-sunflower;
 $c-secondary-b: $c-surf;
 
 
-/**
+/*
  * Layout / Grid
  *
  * The way I've designed this, I don't think we need a very sophisticated grid
@@ -62,6 +62,11 @@ $gutter: 30px;
     }
   }
 }
+
+/*=======
+ * CTA's
+ =======*/
+
 
 /*============= 
 Components 
