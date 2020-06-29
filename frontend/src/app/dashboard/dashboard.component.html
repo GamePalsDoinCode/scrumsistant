@@ -5,16 +5,16 @@
     choose ceremony.
   </div>
   <div class="ceremonyContainer" style="margin-bottom: 30px;">
-    <button routerLink="/app/standup">
+    <button class="btn--primary" routerLink="/app/standup">
       <span class="dashboardClicky">daily</span>
     </button>
-    <button routerLink="/app/pointing">
+    <button class="btn--primary" routerLink="/app/pointing">
       <span class="dashboardClicky">planning</span>
     </button>
-    <button routerLink="/app/retro">
+    <button class="btn--primary" routerLink="/app/retro">
       <span class="dashboardClicky">retro</span>
     </button>
-    <button *ngIf="isPM" routerLink="/pm_tools">
+    <button class="btn--primary" *ngIf="isPM" routerLink="/pm_tools">
       <span class="dashboardClicky">pmConfig</span>
     </button>
     <button (click)="logout()">

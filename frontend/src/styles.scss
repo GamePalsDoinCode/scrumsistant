@@ -1,9 +1,18 @@
 /*=============
  Global Styles
  =============*/
+*{
+  box-sizing: border-box;
+}
 
 /*
- * Color
+ * Table of Contents
+ * S1 - Color
+ * S2 - Layout
+ */
+
+/*
+ * S1: Color
  *
  * The abstracted vars should be used for color declarations, not the color
  * swatches. This ensures that, if the brand colors change in the future, they
@@ -26,7 +35,7 @@ $c-secondary-b: $c-surf;
 
 
 /*
- * Layout / Grid
+ * S2: Layout / Grid
  *
  * The way I've designed this, I don't think we need a very sophisticated grid
  * system. CSS Grid, flexbox, and some responsive widths should be plenty.
@@ -64,8 +73,46 @@ $gutter: 30px;
 }
 
 /*=======
- * CTA's
+ * S3: CTA's
  =======*/
+ .btn--primary{
+   display: block;
+   color: $c-primary-b;
+   background-color: $c-primary-a;
+   border: 3px solid transparent;
+   position: relative;
+   transition: background 0.3s, color 0.3s, border-color 0.3s;
+   outline: none;
+   text-decoration: none;
+   font-family: nunito;
+   font-size: 22px;
+   font-weight: 700;
+
+   &:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -11px;
+    left: -11px;
+    bottom: 4px;
+    right: 4px;
+    z-index: -2;
+    border: 3px solid $c-primary-a;
+    transition: border-color 0.3s;
+  }
+
+  &:hover{
+    cursor: pointer;
+    background: $c-primary-b;
+    color: $c-primary-a;
+    border-color: $c-primary-a;
+  }
+
+  &:active{
+    background: $c-secondary-b;
+    border-color: $c-secondary-b;
+  }
+ }
 
 
 /*============= 
