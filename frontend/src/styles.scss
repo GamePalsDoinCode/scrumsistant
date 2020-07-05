@@ -7,12 +7,23 @@
 
 /*
  * Table of Contents
- * S1 - Color
- * S2 - Layout
+ * S1 - Typography
+ * S2 - Color
+ * S3 - Layout
+ * S4 - CTA's
  */
 
+ /*
+ * S1: Typography
+ * Very minimal for now. Will have to buy the fonts at some point.
+ */
+
+.center-text{
+  text-align: center;
+}
+
 /*
- * S1: Color
+ * S2: Color
  *
  * The abstracted vars should be used for color declarations, not the color
  * swatches. This ensures that, if the brand colors change in the future, they
@@ -35,7 +46,7 @@ $c-secondary-b: $c-surf;
 
 
 /*
- * S2: Layout / Grid
+ * S3: Layout / Grid
  *
  * The way I've designed this, I don't think we need a very sophisticated grid
  * system. CSS Grid, flexbox, and some responsive widths should be plenty.
@@ -51,6 +62,7 @@ $gutter: 30px;
     grid-gap: $gutter;
     padding: 0px $gutter;
     width: 100%;
+    margin-bottom: $gutter;
 
     .grid__item{
       &--one-whole{
@@ -63,6 +75,10 @@ $gutter: 30px;
 
       &--one-half{
         grid-column: span 2;
+
+        &-center{
+          grid-column: 2 / span 2;
+        }
       }
 
       &--one-quarter{
@@ -73,22 +89,23 @@ $gutter: 30px;
 }
 
 /*=======
- * S3: CTA's
+ * S4: CTA's
  =======*/
- .btn--primary{
-   display: block;
-   color: $c-primary-b;
-   background-color: $c-primary-a;
-   border: 3px solid transparent;
-   position: relative;
-   transition: background 0.3s, color 0.3s, border-color 0.3s;
-   outline: none;
-   text-decoration: none;
-   font-family: nunito;
-   font-size: 22px;
-   font-weight: 700;
+ .cta--primary{
+  min-height: 50px;
+  display: block;
+  color: $c-primary-b;
+  background-color: $c-primary-a;
+  border: 3px solid transparent;
+  position: relative;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  outline: none;
+  text-decoration: none;
+  font-family: nunito;
+  font-size: 22px;
+  font-weight: 700;
 
-   &:before {
+  &:before {
     content: '';
     display: block;
     position: absolute;
