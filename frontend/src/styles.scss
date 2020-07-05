@@ -91,11 +91,10 @@ $gutter: 30px;
 /*=======
  * S4: CTA's
  =======*/
- .cta--primary{
+ button{
   min-height: 50px;
   display: block;
-  color: $c-primary-b;
-  background-color: $c-primary-a;
+  
   border: 3px solid transparent;
   position: relative;
   transition: background 0.3s, color 0.3s, border-color 0.3s;
@@ -104,6 +103,23 @@ $gutter: 30px;
   font-family: nunito;
   font-size: 22px;
   font-weight: 700;
+
+  &.cta{
+    &--primary{
+      background-color: $c-primary-a;
+      color: $c-primary-b;
+    }
+
+    &--affirmative{
+      background-color: $c-secondary-b;
+      color: $c-primary-a;
+    }
+
+    &--cautious{
+      background-color: $c-secondary-a;
+      color: $c-primary-a;
+    }
+  }
 
   &:before {
     content: '';
@@ -128,6 +144,10 @@ $gutter: 30px;
   &:active{
     background: $c-secondary-b;
     border-color: $c-secondary-b;
+  }
+
+  &:disabled{
+    opacity: 0.7;
   }
  }
 
