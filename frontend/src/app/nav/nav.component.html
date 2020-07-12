@@ -1,22 +1,18 @@
-<nav>
-  <ul>
-    <li>
-      <a routerLink="/dashboard">Dashboard!</a>
-    </li>
-    <li>
-      <a routerLink="/app/standup">Daily Standup!</a>
-    </li>
-    <li>
-      <a routerLink="/app/pointing">Pointing Meeting!</a>
-    </li>
-    <li>
-      <a routerLink="/app/retro">Sprint Retro!</a>
-    </li>
-    <li *ngIf="isPM()">
-      <a routerLink="/pm_tools">PM Tools!</a>
-    </li>
-    <li (click)="logout()" class="navlist_item--clickable">
-      Logout!
-    </li>
-  </ul>
-</nav>
+<div style="display: flex; justify-content: center;">
+  <img style="width: 500px; margin: auto;" src="../../assets/logo_v1.png" />
+</div>
+<div style="display: flex; justify-content: center;" *ngIf="showSecondaryLinks">
+  <div style="width: 530px;">
+    <div style="float: left;">
+      <a
+        routerLink="/dashboard"
+        style="text-decoration: none; font-color: black;"
+      >
+        &#12296; main
+      </a>
+    </div>
+    <div style="float: right;">
+      team &#12297;
+    </div>
+  </div>
+</div>
