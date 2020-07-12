@@ -5,17 +5,17 @@
     choose ceremony.
   </div>
   <div class="ceremonyContainer" style="margin-bottom: 30px;">
-    <button>
-      <a routerLink="/app/standup" class="dashboardClicky">daily</a>
+    <button routerLink="/app/standup">
+      <span class="dashboardClicky">daily</span>
     </button>
-    <button>
-      <a routerLink="/app/pointing" class="dashboardClicky">planning</a>
+    <button routerLink="/app/pointing">
+      <span class="dashboardClicky">planning</span>
     </button>
-    <button>
-      <a routerLink="/app/retro" class="dashboardClicky">retro</a>
+    <button routerLink="/app/retro">
+      <span class="dashboardClicky">retro</span>
     </button>
-    <button *ngIf="isPM">
-      <a routerLink="/pm_tools" class="dashboardClicky">pmConfig</a>
+    <button *ngIf="isPM" routerLink="/pm_tools">
+      <span class="dashboardClicky">pmConfig</span>
     </button>
     <button (click)="logout()">
       <span class="dashboardClicky">logout</span>
@@ -34,7 +34,7 @@
         [placeholder]="user.display_name ? null : 'What\'s your name, punk?'"
       />
     </label>
-    <button (click)="saveName()">Save!</button>
+    <button (click)="saveName()" id="saveButton">Save!</button>
   </div>
   <app-current-team></app-current-team>
 </div>

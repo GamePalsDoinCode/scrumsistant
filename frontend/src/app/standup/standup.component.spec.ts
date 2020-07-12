@@ -1,6 +1,10 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing'
 
 import {StandupComponent} from './standup.component'
+import {Component} from '@angular/core'
+
+@Component({selector: 'app-nav', template: ''})
+class NavComponentStub {}
 
 describe('StandupComponent', () => {
   let component: StandupComponent
@@ -8,7 +12,7 @@ describe('StandupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [StandupComponent],
+      declarations: [StandupComponent, NavComponentStub],
     }).compileComponents()
   }))
 

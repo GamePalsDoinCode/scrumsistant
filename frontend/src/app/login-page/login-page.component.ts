@@ -12,12 +12,20 @@ export class LoginPageComponent implements OnInit {
     password: '',
   }
 
+  buttonText = 'login'
+  buttonThinking = false
+
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {}
 
   submitLogin() {
-    console.log(this.potentialUser)
-    this.authService.checkCredentials(this.potentialUser)
+    this.buttonText = 'wait...'
+    this.buttonThinking = true
+    const credsOk = this.authService.checkCredentials(this.potentialUser)
+    if (!credsOk) {
+      this.buttonText = 'login'
+      this.buttonThinking = false
+    }
   }
 }

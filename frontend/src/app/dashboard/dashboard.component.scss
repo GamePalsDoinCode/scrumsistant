@@ -17,7 +17,7 @@ div.ceremonyContainer {
   cursor: pointer;
 }
 
-.ceremonyContainer > button :before {
+.ceremonyContainer > button:before {
   content: '';
   display: block;
   position: absolute;
@@ -25,21 +25,20 @@ div.ceremonyContainer {
   left: -8px;
   bottom: 4px;
   right: 4px;
-  border: 2.5px solid black;
+  border: 2.5px solid $ceremonyButtonBGColor;
 }
 
-.ceremonyContainer > button :hover {
-  opacity: 70%;
+.ceremonyContainer > button:active {
+  background-color: #3b3f47;
+}
+.ceremonyContainer > button:active:before {
+  border-color: #3b3f47;
 }
 
 .dashboardClicky {
   text-decoration: none;
   color: white;
-  font-family: arial;
+  font-family: nunito;
   font-size: 22px;
   font-weight: 700;
-}
-
-.dashboardClicky :visited {
-  color: black;
 }
