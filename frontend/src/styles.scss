@@ -1,4 +1,190 @@
-/* You can add global styles to this file, and also import other style files */
+/*=============
+ Global Styles
+ =============*/
+
+/*
+ * Table of Contents
+ * S1 - Typography
+ * S2 - Color
+ * S3 - Layout
+ * S4 - CTA's
+ */
+
+ /*
+ * S1: Typography
+ * Very minimal for now. Will have to buy the fonts at some point.
+ */
+
+.center-text{
+  text-align: center;
+}
+
+/*
+ * S2: Color
+ *
+ * The abstracted vars should be used for color declarations, not the color
+ * swatches. This ensures that, if the brand colors change in the future, they
+ * only need to be edited once, here.
+ */
+
+// Swatches
+$c-black: #000000;
+$c-white: #FFF;
+$c-sunflower: #fed359;
+$c-surf: #9dd098;
+$c-grey: #e8e8e8;
+
+// Abstracted Primaries
+$c-primary-a: $c-black;
+$c-primary-b: $c-white;
+
+// Abstracted Secondaries
+$c-secondary-a: $c-sunflower;
+$c-secondary-b: $c-surf;
+
+// Abstracted Neutrals
+$c-neutral-a: $c-grey;
+
+
+/*
+ * S3: Layout / Grid
+ *
+ * The way I've designed this, I don't think we need a very sophisticated grid
+ * system. CSS Grid, flexbox, and some responsive widths should be plenty.
+ */
+
+ *{
+  box-sizing: border-box;
+}
+
+$gutter: 30px;
+.container{
+  margin: 0px auto;
+  max-width: 595px;
+  .grid{
+    // A simple 4-column grid.
+    display: grid;
+    grid-template-columns: repeat(4, 1fr [col-start]);
+    grid-gap: $gutter;
+    padding: 0px $gutter;
+    width: 100%;
+    margin-bottom: $gutter;
+
+    // Grid items use BEM selectors. See: https://jonsuh.com/blog/sass-bem-selector-and-trailing-ampersand/
+    .grid__item{
+      &--one-whole{
+        grid-column: span 4;
+      }
+
+      &--three-quarters{
+        grid-column: span 3;
+      }
+
+      &--one-half{
+        grid-column: span 2;
+
+        // The one-half size gets a centered variation, as a majority of CTA's
+        // span the middle two columns.
+        &-center{
+          grid-column: 2 / span 2;
+        }
+      }
+
+      &--one-quarter{
+        grid-column: span 1;
+      }
+    }
+  }
+}
+
+/*=======
+ * S4: CTA's
+ =======*/
+button{
+  // This :not selector is temporary until we get better designs for the user
+  // name component in the bottom-left of dashboard.
+  &:not(#saveButton){
+    //  Base button styles
+    width: 100%;
+    min-height: 50px;
+    display: block;
+    border: 3px solid transparent;
+    position: relative;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+    outline: none;
+    text-decoration: none;
+    font-family: nunito;
+    font-size: 22px;
+    font-weight: 700;
+
+    // Use BEM selectors to keep things DRYer. See: https://jonsuh.com/blog/sass-bem-selector-and-trailing-ampersand/
+    &.cta{
+      &--primary{
+        background-color: $c-primary-a;
+        color: $c-primary-b;
+      }
+
+      &--affirmative{
+        background-color: $c-secondary-b;
+        color: $c-primary-a;
+        border-color: $c-primary-a;
+      }
+
+      &--cautious{
+        background-color: $c-secondary-a;
+        color: $c-primary-a;
+        border-color: $c-primary-a;
+      }
+    }
+
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -11px;
+      left: -11px;
+      bottom: 4px;
+      right: 4px;
+      z-index: -2;
+      border: 3px solid $c-primary-a;
+      transition: border-color 0.3s;
+    }
+
+    &:hover{
+      cursor: pointer;
+      background: $c-primary-b;
+      color: $c-primary-a;
+      border-color: $c-primary-a;
+    }
+
+    &:active{
+      background: $c-secondary-b;
+      border-color: $c-secondary-b;
+    }
+
+    &:disabled{
+      background-color: $c-neutral-a;
+      border-color: $c-primary-a;
+      &:hover{
+        color: $c-primary-b;
+      }
+    }
+  }
+}
+
+.cta--text{
+  text-decoration: underline;
+  transition: color 0.3s;
+  &:hover{
+    color: $c-secondary-b;
+    cursor: pointer;
+  }
+}
+
+
+/*============= 
+Components 
+=============*/
 @import 'app/nav/nav.component';
 @import 'app/dashboard/dashboard.component';
 @import 'app/pointing/pointing.component';
