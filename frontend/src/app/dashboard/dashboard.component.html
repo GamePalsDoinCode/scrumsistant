@@ -8,19 +8,35 @@
   </div>
   <div class="ceremonyContainer container">
     <div class="grid">
-      <button class="grid__item--one-half-center cta--primary" routerLink="/app/standup">
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/standup"
+      >
         <span class="dashboardClicky">daily</span>
       </button>
-      <button class="grid__item--one-half-center cta--primary" routerLink="/app/pointing">
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/pointing"
+      >
         <span class="dashboardClicky">planning</span>
       </button>
-      <button class="grid__item--one-half-center cta--primary" routerLink="/app/retro">
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/retro"
+      >
         <span class="dashboardClicky">retro</span>
       </button>
-      <button class="grid__item--one-half-center cta--primary" *ngIf="isPM" routerLink="/pm_tools">
+      <button
+        class="grid__item--one-half-center cta--primary"
+        *ngIf="isPM"
+        routerLink="/pm_tools"
+      >
         <span class="dashboardClicky">pmConfig</span>
       </button>
-      <p class="grid__item--one-half-center cta--text center-text logout" (click)="logout()">
+      <p
+        class="grid__item--one-half-center cta--text center-text logout"
+        (click)="logout()"
+      >
         <span class="dashboardClicky">logout.</span>
       </p>
     </div>
@@ -40,5 +56,4 @@
     </label>
     <button (click)="saveName()" id="saveButton">Save!</button>
   </div>
-  <app-current-team></app-current-team>
 </div>
