@@ -101,8 +101,8 @@ describe('DashboardComponent', () => {
   }))
   it('should call auth logout when logout button is clicked', fakeAsync(() => {
     const logoutButton = fixture.debugElement.query(
-      By.css('div.ceremonyContainer > button:nth-child(4)')
-    ) // obv this is a hack shortcut while I wait for someone to style the page
+      By.css('.ceremonyContainer .logout')
+    )
     logoutButton.nativeElement.click()
     tick()
     expect(logoutSpy).toHaveBeenCalled()

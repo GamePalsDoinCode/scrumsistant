@@ -1,25 +1,45 @@
 <app-nav [showSecondaryLinks]="false"></app-nav>
 
 <div style="margin-top: 40px; margin-bottom: 10px;">
-  <div style="text-align: center;">
-    choose ceremony.
+  <div class="container">
+    <div class="grid">
+      <p class="grid__item--one-whole center-text">choose a ceremony.</p>
+    </div>
   </div>
-  <div class="ceremonyContainer" style="margin-bottom: 30px;">
-    <button routerLink="/app/standup">
-      <span class="dashboardClicky">daily</span>
-    </button>
-    <button routerLink="/app/pointing">
-      <span class="dashboardClicky">planning</span>
-    </button>
-    <button routerLink="/app/retro">
-      <span class="dashboardClicky">retro</span>
-    </button>
-    <button *ngIf="isPM" routerLink="/pm_tools">
-      <span class="dashboardClicky">pmConfig</span>
-    </button>
-    <button (click)="logout()">
-      <span class="dashboardClicky">logout</span>
-    </button>
+  <div class="ceremonyContainer container">
+    <div class="grid">
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/standup"
+      >
+        <span class="dashboardClicky">daily</span>
+      </button>
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/pointing"
+      >
+        <span class="dashboardClicky">planning</span>
+      </button>
+      <button
+        class="grid__item--one-half-center cta--primary"
+        routerLink="/app/retro"
+      >
+        <span class="dashboardClicky">retro</span>
+      </button>
+      <button
+        class="grid__item--one-half-center cta--primary"
+        *ngIf="isPM"
+        routerLink="/pm_tools"
+      >
+        <span class="dashboardClicky">pmConfig</span>
+      </button>
+      <p
+        class="grid__item--one-half-center cta--text center-text logout"
+        (click)="logout()"
+      >
+        <span class="dashboardClicky">logout.</span>
+      </p>
+    </div>
   </div>
 
   <div style="display: flex; justify-content: center;">
@@ -36,5 +56,4 @@
     </label>
     <button (click)="saveName()" id="saveButton">Save!</button>
   </div>
-  <app-current-team></app-current-team>
 </div>

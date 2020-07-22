@@ -1,0 +1,78 @@
+$disabled-color: #b0b0b0;
+$enabled-color: black;
+$active-color: #9dd098;
+
+.welcome-text {
+  text-align: center;
+  font-family: nunito;
+  font-size: 24px;
+}
+
+.login-input {
+  width: 300px;
+  height: 37px;
+
+  border: 2px solid black;
+
+  font-family: nunito;
+  font-size: 20px;
+
+  padding-left: 10px;
+}
+
+.login-button-base {
+  width: 300px;
+  height: 50px;
+
+  font-family: nunito;
+  font-size: 24px;
+
+  position: relative;
+  border: none;
+}
+
+.login-button-base:before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  bottom: 4px;
+  right: 4px;
+}
+
+.login-button {
+  &:disabled {
+    background-color: $disabled-color;
+    color: white;
+  }
+  &:disabled:before {
+    border: 2.5px solid $disabled-color;
+  }
+  &:enabled {
+    background-color: $enabled-color;
+    color: white;
+    cursor: pointer;
+    border: none;
+  }
+  &:enabled:before {
+    border: 2.5px solid $enabled-color;
+  }
+  &:active {
+    background-color: $active-color;
+    color: white;
+    border: none;
+  }
+  &:active:before {
+    border: 2.5px solid $active-color;
+  }
+}
+
+.login-button-thinking {
+  background-color: $active-color;
+  color: white;
+  border: none;
+}
+.login-button-thinking:before {
+  border: 2.5px solid $active-color;
+}

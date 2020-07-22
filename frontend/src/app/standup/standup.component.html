@@ -1,11 +1,15 @@
 <app-nav></app-nav>
 
 Welcome To The Standup!
-<div *ngIf="!standupOver">
-  <div>It is {{ participants[speakerIdx] }}'s turn!</div>
-  <div>Seconds Remaining: {{ curSpeakingTime }}</div>
-  <div>
-    <button (click)="endTurn()">I'm Done!</button>
+<div class="container" *ngIf="!standupOver">
+  <div class="grid">
+    <div class="grid__item--one-whole">
+      <div class="center-text">It is {{ participants[speakerIdx] }}'s turn!</div>
+      <div class="center-text">Seconds Remaining: {{ curSpeakingTime }}</div>
+    </div>
+    <div class="grid__item--one-half-center">
+      <button class="cta--primary" (click)="endTurn()">I'm Done!</button>
+    </div>
   </div>
 </div>
 
