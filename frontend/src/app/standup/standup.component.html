@@ -1,6 +1,37 @@
 <app-nav></app-nav>
 
-Welcome To The Standup!
+<div class="container">
+  <div class="grid">
+    <div class="center-text grid__item--one-half-center">
+      daily.
+    </div>
+    <textarea
+      class="grid__item--one-half-center"
+      placeholder="notes..."
+      style="height: 200px; padding: 10px;"
+    ></textarea>
+    <div class="center-text grid__item--one-half-center">
+      Current Speaker: {{ getCurrentSpeaker()[0] }}
+    </div>
+    <div
+      class="center-text grid__item--one-half-center"
+      style="font-size: 28px;"
+    >
+      1:37
+    </div>
+    <div class="center-text grid__item--one-half-center">
+      remaining to speak
+    </div>
+    <button class="cta--affirmative grid__item--one-half-center">
+      pass
+    </button>
+    <button class="cta--cautious grid__item--one-half-center">
+      stay after
+    </button>
+  </div>
+</div>
+
+<!-- Welcome To The Standup!
 <div class="container" *ngIf="!standupOver">
   <div class="grid">
     <div class="grid__item--one-whole">
@@ -16,3 +47,4 @@ Welcome To The Standup!
 <div *ngIf="standupOver">
   Great job! Back to work now!
 </div>
+ -->

@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core'
-import {ClockService} from '../clock.service'
+import {UserService, DisplayAndID} from '../user.service'
+import {WebsocketService} from '../websocket.service'
+import {Subscription} from 'rxjs'
 
 @Component({
   selector: 'app-standup',
@@ -7,50 +9,31 @@ import {ClockService} from '../clock.service'
   styleUrls: ['./standup.component.scss'],
 })
 export class StandupComponent implements OnInit {
-  constructor(private clockService: ClockService) {}
+  currentSpeakerIdx = 0
+  currentTeam: DisplayAndID[]
+  socketSubscription: Subscription
 
-  maxSpeakingTimeSeconds = 5
-  participants = ['You', 'Dr. Tuttle', 'Judge Bostrum', 'Professor Stromburg']
-  speakerIdx: number | undefined = undefined
+  constructor(
+    private userService: UserService,
+    private websocketService: WebsocketService
+  ) {}
 
-  spokenIdxs = new Set()
-  standupOver = false
-  curSpeakingTime = 5
-
-  ngOnInit(): void {
-    this.speakerIdx = Math.random() < 0.5 ? 0 : 1
-    this.spokenIdxs.add(this.speakerIdx)
-    this.setUpClock()
+  async ngOnInit() {
+    this.currentTeam = await this.userService.currentlyLoggedIn().toPromise()
+    this.socketSubscription = this.websocketService
+      .getSocketChannel({}, msg => msg.channel === 'daily' && !!msg.message)
+      .subscribe(
+        msg => this.handleMessage(msg.message),
+        err => console.log('DailyError', err),
+        () => console.log('DailyClose')
+      )
   }
 
-  setUpClock() {
-    this.curSpeakingTime = this.maxSpeakingTimeSeconds
-    this.clockService.getTimer(
-      this.maxSpeakingTimeSeconds,
-      1000,
-      () => (this.curSpeakingTime = this.curSpeakingTime - 1),
-      () => this.chooseNextSpeaker()
-    )
+  getCurrentSpeaker() {
+    return this.currentTeam[this.currentSpeakerIdx]
   }
 
-  chooseNextSpeaker() {
-    let availableIdxs: number[] = []
-    this.participants.map((_, idx) => {
-      if (!this.spokenIdxs.has(idx)) {
-        availableIdxs.push(idx)
-      }
-    })
-    let nextIdx = Math.floor(Math.random() * availableIdxs.length)
-    this.speakerIdx = availableIdxs[nextIdx]
-    this.spokenIdxs.add(this.speakerIdx)
-    this.setUpClock()
-  }
-
-  endTurn() {
-    if (this.spokenIdxs.size == this.participants.length) {
-      this.standupOver = true
-    } else {
-      this.chooseNextSpeaker()
-    }
+  handleMessage(message: any) {
+    console.log(message)
   }
 }
