@@ -1,0 +1,19 @@
+@import '../../styles.scss';
+
+.team-container {
+  border: 3px solid black;
+  padding: 15px;
+}
+
+.team-header-text {
+  color: $c-primary-a;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+
+.team-member-name {
+  color: $c-primary-a;
+  font-size: 18px;
+  margin-top: 10px;
+}
