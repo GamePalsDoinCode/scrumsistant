@@ -30,6 +30,7 @@
         type="password"
         style="margin-top: 45px;"
         class="login-input"
+        (keydown.enter)="submitLogin()"
       />
     </div>
     <div style="width: 15%; margin: auto;">
@@ -40,6 +41,7 @@
         (click)="submitLogin()"
         style="margin-top: 45px;"
         class="login-button-base"
+        type="submit"
         [ngClass]="{
           'login-button-thinking': buttonThinking,
           'login-button': !buttonThinking
