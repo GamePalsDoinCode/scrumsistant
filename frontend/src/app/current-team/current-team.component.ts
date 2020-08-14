@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy} from '@angular/core'
+import {Component, OnInit, OnDestroy, Input} from '@angular/core'
 import {UserService, DisplayAndID} from '../user.service'
 import {AuthService} from '../auth.service'
 import {concat, Subscription} from 'rxjs'
@@ -13,6 +13,8 @@ export class CurrentTeamComponent implements OnInit, OnDestroy {
   currentTeam: DisplayAndID[]
   currentUser: Scrum.User
   socketSubscription: Subscription
+
+  @Input() closeFunction: () => void
 
   constructor(
     private userService: UserService,

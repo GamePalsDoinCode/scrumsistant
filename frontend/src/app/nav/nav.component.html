@@ -11,8 +11,26 @@
         &#12296; main
       </a>
     </div>
-    <div style="float: right;">
-      team &#12297;
+    <div style="position: relative;">
+      <div
+        style="float: right; cursor: pointer;"
+        (click)="toggleShowCurrentTeam()"
+        *ngIf="!showTeamComponent"
+      >
+        team &#12297;
+      </div>
+      <app-current-team
+        [closeFunction]="toggleShowCurrentTeamInput"
+        *ngIf="showTeamComponent"
+        style="
+          z-index: 50;
+          position: absolute;
+          top: 0;
+          right: -100px;
+          background-color: white;
+        "
+      >
+      </app-current-team>
     </div>
   </div>
 </div>
